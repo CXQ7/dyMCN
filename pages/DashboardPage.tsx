@@ -1,25 +1,25 @@
-import { useState } from 'react';
-import { PendingQuestions } from '../components/PendingQuestions';
-import { AnsweredHistory } from '../components/AnsweredHistory';
-import { TransactionRelation } from '../components/TransactionRelation';
-import { Dashboard } from '../components/Dashboard';
-import { RoomFilter } from '../components/RoomFilter';
+import { useState } from "react";
+import { PendingQuestions } from "../components/PendingQuestions";
+import { AnsweredHistory } from "../components/AnsweredHistory";
+import { TransactionRelation } from "../components/TransactionRelation";
+import { Dashboard } from "../components/Dashboard";
+import { RoomFilter } from "../components/RoomFilter";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../components/ui/select';
-import { Calendar } from 'lucide-react';
-import { 
+} from "../components/ui/select";
+import { Calendar } from "lucide-react";
+import {
   PendingQuestion,
   AnsweredQuestion,
   Transaction,
   RoomMetrics,
   LiveRoom,
-  TimeRange
-} from '../types';
+  TimeRange,
+} from "../types";
 
 interface DashboardPageProps {
   pendingQuestions: PendingQuestion[];
@@ -27,6 +27,18 @@ interface DashboardPageProps {
   transactions: Transaction[];
   roomMetrics: RoomMetrics[];
   liveRooms: LiveRoom[];
+  loading?: boolean;
+  onlineCountsLoading?: boolean;
+  realTimeOnlineCounts?: Record<string, number>;
+  totalOnlineCount?: number;
+  getChartData?: (
+    roomId?: string
+  ) => Array<{ time: number; count: number; label: string }>;
+  getYAxisRange?: (data: { count: number }[]) => { min: number; max: number };
+  getPendingDataStatus?: () => Record<
+    string,
+    { isWaiting: boolean; waitingTime: number; originalCount: number }
+  >;
 }
 
 export function DashboardPage({
@@ -34,20 +46,28 @@ export function DashboardPage({
   answeredQuestions,
   transactions,
   roomMetrics,
-  liveRooms
+  liveRooms,
+  loading = false,
+  onlineCountsLoading = false,
+  realTimeOnlineCounts = {},
+  totalOnlineCount = 0,
+  getChartData,
+  getYAxisRange,
+  getPendingDataStatus,
 }: DashboardPageProps) {
-  const [selectedRoomId, setSelectedRoomId] = useState('all');
-  
+  const [selectedRoomId, setSelectedRoomId] = useState("all");
+
   // 时间范围选择
   const timeRanges: TimeRange[] = [
-    { label: '今日', value: 'today', days: 1 },
-    { label: '近7天', value: '7days', days: 7 },
-    { label: '近30天', value: '30days', days: 30 },
-    { label: '近90天', value: '90days', days: 90 }
+    { label: "今日", value: "today", days: 1 },
+    { label: "近7天", value: "7days", days: 7 },
+    { label: "近30天", value: "30days", days: 30 },
+    { label: "近90天", value: "90days", days: 90 },
   ];
-  
-  const [selectedTimeRange, setSelectedTimeRange] = useState<string>('today');
-  const currentTimeRange = timeRanges.find(t => t.value === selectedTimeRange) || timeRanges[0];
+
+  const [selectedTimeRange, setSelectedTimeRange] = useState<string>("today");
+  const currentTimeRange =
+    timeRanges.find((t) => t.value === selectedTimeRange) || timeRanges[0];
 
   return (
     <div className="p-4 space-y-4">
@@ -56,13 +76,18 @@ export function DashboardPage({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-xl font-semibold">运营数据看板</h2>
-            <p className="text-sm text-muted-foreground">实时监控直播间互动数据和运营效果</p>
+            <p className="text-sm text-muted-foreground">
+              实时监控直播间互动数据和运营效果
+            </p>
           </div>
           <div className="flex items-center gap-4">
             {/* 时间范围选择器 */}
             <div className="flex items-center gap-2">
               <Calendar className="size-4 text-muted-foreground" />
-              <Select value={selectedTimeRange} onValueChange={setSelectedTimeRange}>
+              <Select
+                value={selectedTimeRange}
+                onValueChange={setSelectedTimeRange}
+              >
                 <SelectTrigger className="w-28">
                   <SelectValue />
                 </SelectTrigger>
@@ -75,12 +100,15 @@ export function DashboardPage({
                 </SelectContent>
               </Select>
             </div>
-            
+
             {/* 直播间选择器 */}
-            <RoomFilter 
+            <RoomFilter
               liveRooms={liveRooms}
               selectedRoomId={selectedRoomId}
               onRoomSelect={setSelectedRoomId}
+              loading={loading}
+              onlineCountsLoading={onlineCountsLoading}
+              realTimeOnlineCounts={realTimeOnlineCounts}
             />
           </div>
         </div>
@@ -113,11 +141,17 @@ export function DashboardPage({
 
           {/* D区域：数据看板 */}
           <div className="lg:col-span-3 xl:col-span-1 h-full overflow-y-auto">
-            <Dashboard 
-              metrics={roomMetrics} 
+            <Dashboard
+              metrics={roomMetrics}
               selectedRoomId={selectedRoomId}
               liveRooms={liveRooms}
               timeRange={currentTimeRange}
+              onlineCountsLoading={onlineCountsLoading}
+              realTimeOnlineCounts={realTimeOnlineCounts}
+              totalOnlineCount={totalOnlineCount}
+              getChartData={getChartData}
+              getYAxisRange={getYAxisRange}
+              getPendingDataStatus={getPendingDataStatus}
             />
           </div>
         </div>

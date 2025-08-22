@@ -24,12 +24,17 @@ interface ForwardMessage {
 // 定义直播间状态
 type RoomStatus = "preparing" | "living" | "ended";
 
+// 定义在线人数更新回调
+type OnlineCountCallback = (roomId: string, count: number) => void;
+
 class LiveRoomMonitor {
   private activeConnections: Map<string, DyCast> = new Map();
   private wsConnection: WebSocket | null = null;
   private reconnectInterval: NodeJS.Timeout | null = null;
   private shouldReconnect: boolean = false;
   private isMonitoringActive: boolean = false;
+  private onlineCountCallbacks: Set<OnlineCountCallback> = new Set();
+  private roomOnlineCounts: Map<string, number> = new Map();
 
   constructor() {
     // 移除自动初始化
@@ -146,7 +151,7 @@ class LiveRoomMonitor {
               title: info?.title,
               cover: info?.cover,
               nickname: info?.nickname,
-              online_count: 0, // 暂时设为0，等待实际数据
+              online_count: 0, // 初始设为0，等待member_count事件更新
             },
             timestamp: Date.now(),
           })
@@ -182,6 +187,30 @@ class LiveRoomMonitor {
 
       // 转发弹幕消息
       messages.forEach((msg) => {
+        // 检查是否是在线人数更新消息
+        if (
+          msg.method === CastMethod.ROOM_STATS &&
+          msg.room?.audienceCount !== undefined
+        ) {
+          const count =
+            typeof msg.room.audienceCount === "string"
+              ? parseInt(msg.room.audienceCount)
+              : msg.room.audienceCount;
+          this.updateOnlineCount(platformId, count);
+        }
+
+        // 也检查其他可能包含在线人数的消息
+        if (
+          msg.method === CastMethod.MEMBER &&
+          msg.room?.audienceCount !== undefined
+        ) {
+          const count =
+            typeof msg.room.audienceCount === "string"
+              ? parseInt(msg.room.audienceCount)
+              : msg.room.audienceCount;
+          this.updateOnlineCount(platformId, count);
+        }
+
         const forwardMsg: ForwardMessage = {
           room_id: platformId,
           method: msg.method || "",
@@ -214,6 +243,45 @@ class LiveRoomMonitor {
     });
 
     cast.connect();
+  }
+
+  // 更新在线人数
+  private updateOnlineCount(roomId: string, count: number) {
+    console.log(`[LiveRoomMonitor] 更新在线人数: ${roomId} -> ${count}`);
+    this.roomOnlineCounts.set(roomId, count);
+    // 通知所有订阅者
+    this.onlineCountCallbacks.forEach((callback) => {
+      try {
+        callback(roomId, count);
+      } catch (error) {
+        console.error("在线人数回调执行失败:", error);
+      }
+    });
+  }
+
+  // 订阅在线人数更新
+  public subscribeToOnlineCount(callback: OnlineCountCallback) {
+    this.onlineCountCallbacks.add(callback);
+
+    // 返回取消订阅函数
+    return () => {
+      this.onlineCountCallbacks.delete(callback);
+    };
+  }
+
+  // 获取直播间当前在线人数
+  public getOnlineCount(roomId: string): number | undefined {
+    return this.roomOnlineCounts.get(roomId);
+  }
+
+  // 获取所有直播间在线人数
+  public getAllOnlineCounts(): Map<string, number> {
+    const counts = new Map(this.roomOnlineCounts);
+    console.log(
+      `[LiveRoomMonitor] getAllOnlineCounts:`,
+      Array.from(counts.entries())
+    );
+    return counts;
   }
 
   // 更新直播间状态

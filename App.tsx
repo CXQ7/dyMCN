@@ -2,19 +2,16 @@ import { useState, useEffect, Suspense, lazy } from "react";
 import { Navigation } from "./components/Navigation";
 import { LoginPage } from "./pages/LoginPage";
 import {
-  generatePendingQuestions,
-  generateAnsweredQuestions,
-  generateTransactions,
-  generateRoomMetrics,
   generateManualReplies,
   generateSystemSettings,
-  liveRooms,
 } from "./utils/mockData";
 import { User } from "./types";
 import { useTheme } from "./components/ThemeProvider";
 import { Toaster } from "./components/ui/sonner";
 import { liveRoomMonitor } from "./src/dycast/services/liveRoomMonitor";
 import { toast } from "sonner";
+import { useLiveRooms } from "./src/hooks/useLiveRooms";
+import { useRealData } from "./src/hooks/useRealData";
 
 const DashboardPage = lazy(() =>
   import("./pages/DashboardPage").then((m) => ({ default: m.DashboardPage }))
@@ -43,11 +40,36 @@ function AppInner() {
     generateSystemSettings()
   );
 
-  // 共享数据
-  const [pendingQuestions] = useState(generatePendingQuestions(30));
-  const [answeredQuestions] = useState(generateAnsweredQuestions(80));
-  const [transactions] = useState(generateTransactions(25));
-  const [roomMetrics] = useState(() => generateRoomMetrics());
+  const {
+    liveRooms,
+    loading: liveRoomsLoading,
+    onlineCountsLoading,
+    realTimeOnlineCounts,
+    totalOnlineCount,
+    getChartData,
+    getYAxisRange,
+    getPendingDataStatus,
+    error: liveRoomsError,
+  } = useLiveRooms();
+
+  const {
+    pendingQuestions,
+    answeredQuestions,
+    transactions,
+    roomMetrics,
+    loading: dataLoading,
+    error: dataError,
+  } = useRealData();
+
+  // 显示数据加载错误
+  useEffect(() => {
+    if (liveRoomsError) {
+      toast.error(`直播间数据加载失败: ${liveRoomsError}`);
+    }
+    if (dataError) {
+      toast.error(`业务数据加载失败: ${dataError}`);
+    }
+  }, [liveRoomsError, dataError]);
   const [manualReplies] = useState(generateManualReplies(8));
 
   // 检查本地存储的登录状态
@@ -136,6 +158,12 @@ function AppInner() {
             transactions={transactions}
             roomMetrics={roomMetrics}
             liveRooms={liveRooms}
+            loading={liveRoomsLoading || dataLoading}
+            onlineCountsLoading={onlineCountsLoading}
+            realTimeOnlineCounts={realTimeOnlineCounts}
+            totalOnlineCount={totalOnlineCount}
+            getChartData={getChartData}
+            getYAxisRange={getYAxisRange}
           />
         );
       case "customer-service":
@@ -164,6 +192,12 @@ function AppInner() {
             transactions={transactions}
             roomMetrics={roomMetrics}
             liveRooms={liveRooms}
+            loading={liveRoomsLoading || dataLoading}
+            onlineCountsLoading={onlineCountsLoading}
+            realTimeOnlineCounts={realTimeOnlineCounts}
+            totalOnlineCount={totalOnlineCount}
+            getChartData={getChartData}
+            getYAxisRange={getYAxisRange}
           />
         );
     }

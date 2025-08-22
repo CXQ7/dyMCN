@@ -102,114 +102,11 @@ function getRandomDate(daysAgo: number = 0, hoursAgo: number = 24): Date {
   );
 }
 
-export function generatePendingQuestions(
-  count: number = 20
-): PendingQuestion[] {
-  return Array.from({ length: count }, (_, i) => {
-    const room = getRandomItem(liveRooms);
-    return {
-      id: `pending-${i + 1}`,
-      roomId: room.id,
-      roomName: room.name,
-      userName: getRandomItem(userNames),
-      question: getRandomItem(sampleQuestions),
-      timestamp: getRandomDate(0, 2),
-    };
-  });
-}
-
-export function generateAnsweredQuestions(
-  count: number = 50
-): AnsweredQuestion[] {
-  return Array.from({ length: count }, (_, i) => {
-    const room = getRandomItem(liveRooms);
-    const timestamp = getRandomDate(0, 24);
-    const answerTime = new Date(
-      timestamp.getTime() + Math.random() * 30 * 60 * 1000
-    );
-
-    return {
-      id: `answered-${i + 1}`,
-      roomId: room.id,
-      roomName: room.name,
-      userName: getRandomItem(userNames),
-      question: getRandomItem(sampleQuestions),
-      answer: getRandomItem(sampleAnswers),
-      timestamp,
-      answerTime,
-    };
-  });
-}
-
-export function generateTransactions(count: number = 15): Transaction[] {
-  return Array.from({ length: count }, (_, i) => {
-    const room = getRandomItem(liveRooms);
-    const answerTime = getRandomDate(0, 5);
-    const orderTime = new Date(
-      answerTime.getTime() + Math.random() * 5 * 60 * 1000
-    );
-    const channel = getRandomItem(["comment", "presale"] as const);
-
-    return {
-      id: `transaction-${i + 1}`,
-      roomId: room.id,
-      roomName: room.name,
-      userName: getRandomItem(userNames),
-      answerTime,
-      orderTime,
-      amount: Math.floor(Math.random() * 500) + 50,
-      channel,
-      productName: getRandomItem(productNames),
-    };
-  });
-}
-
-export function generateRoomMetrics(): RoomMetrics[] {
-  return liveRooms.map((room) => {
-    // 生成转化率数据，确保售前和评论互动转化率有所区别
-    const baseConversion = Math.random() * 0.15 + 0.05;
-    const presaleConversion = baseConversion + Math.random() * 0.08; // 售前转化率通常更高
-    const commentConversion = baseConversion - Math.random() * 0.03; // 评论互动转化率相对较低
-
-    // 基于在线人数和转化率生成成交金额
-    const baseOnline = room.onlineCount;
-    const presaleAmount = Math.floor(
-      baseOnline *
-        Math.max(0.01, presaleConversion) *
-        (Math.random() * 300 + 200)
-    ); // 平均客单价200-500元
-    const commentAmount = Math.floor(
-      baseOnline *
-        Math.max(0.01, commentConversion) *
-        (Math.random() * 200 + 150)
-    ); // 平均客单价150-350元
-
-    return {
-      roomId: room.id,
-      roomName: room.name,
-      pendingCount: Math.floor(Math.random() * 20) + 5,
-      answeredCount: Math.floor(Math.random() * 100) + 50,
-      knowledgeCount: Math.floor(Math.random() * 200) + 100,
-      conversionRate: baseConversion,
-      presaleConversionRate: Math.max(0.01, presaleConversion), // 确保不为负数
-      commentConversionRate: Math.max(0.01, commentConversion), // 确保不为负数
-      presaleAmount: presaleAmount,
-      commentAmount: commentAmount,
-      onlineHistory: Array.from(
-        { length: 60 },
-        () => Math.floor(Math.random() * 1000) + room.onlineCount - 500
-      ),
-      newJoinHistory: Array.from(
-        { length: 60 },
-        () => Math.floor(Math.random() * 50) + 5
-      ), // 每秒新进人数，范围5-55
-      commentResponseTime: Math.floor(Math.random() * 120) + 30, // 评论应答时间均值：30-150秒
-      presaleResponseTime: Math.floor(Math.random() * 300) + 60, // 售前应答时间均值：60-360秒
-      averageStayDuration: Math.floor(Math.random() * 45) + 15, // 用户停留时长均值：15-60分钟
-      presaleLeadCount: Math.floor(Math.random() * 50) + 20, // 售前引流量：20-70人
-    };
-  });
-}
+// 以下函数已迁移到真实数据服务，这里保留注释作为记录
+// export function generatePendingQuestions() - 已迁移到 dataService.ts
+// export function generateAnsweredQuestions() - 已迁移到 dataService.ts
+// export function generateTransactions() - 已迁移到 dataService.ts
+// export function generateRoomMetrics() - 已迁移到 dataService.ts
 
 export function generateQACandidates(count: number = 8): QACandidate[] {
   return Array.from({ length: count }, (_, i) => ({
@@ -512,4 +409,5 @@ export function getUserRoleLabel(role: UserRole): string {
   }
 }
 
-export { liveRooms };
+// 注意：liveRooms 现在从 Supabase 获取，不再从这里导出
+// export { liveRooms };

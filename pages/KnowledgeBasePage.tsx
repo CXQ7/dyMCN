@@ -1,20 +1,49 @@
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Textarea } from '../components/ui/textarea';
-import { ScrollArea } from '../components/ui/scroll-area';
-import { Badge } from '../components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '../components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Separator } from '../components/ui/separator';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
-import { 
-  Upload, 
-  FileText, 
-  Database, 
-  Plus, 
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Textarea } from "../components/ui/textarea";
+import { ScrollArea } from "../components/ui/scroll-area";
+import { Badge } from "../components/ui/badge";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "../components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import { Separator } from "../components/ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
+import {
+  Upload,
+  FileText,
+  Database,
+  Plus,
   Search,
   Download,
   Trash2,
@@ -26,65 +55,88 @@ import {
   Settings,
   MoreVertical,
   Archive,
-  ArchiveRestore
-} from 'lucide-react';
-import { Document, KnowledgeItem, LiveRoom } from '../types';
-import { generateDocuments, generateKnowledgeItems, liveRooms } from '../utils/mockData';
+  ArchiveRestore,
+} from "lucide-react";
+import { Document, KnowledgeItem, LiveRoom } from "../types";
+import { generateDocuments, generateKnowledgeItems } from "../utils/mockData";
+import { useLiveRooms } from "../src/hooks/useLiveRooms";
+import {
+  createLiveRoom,
+  updateLiveRoomStatus,
+  deleteLiveRoom,
+} from "../src/lib/liveRoomService";
+import { toast } from "sonner";
 
 export function KnowledgeBasePage() {
   const [documents, setDocuments] = useState(generateDocuments(25));
-  const [knowledgeItems, setKnowledgeItems] = useState(generateKnowledgeItems(60));
-  const [rooms, setRooms] = useState<LiveRoom[]>(liveRooms);
-  const [selectedRoom, setSelectedRoom] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [knowledgeItems, setKnowledgeItems] = useState(
+    generateKnowledgeItems(60)
+  );
+
+  const {
+    liveRooms: rooms,
+    loading: roomsLoading,
+    refreshLiveRooms,
+  } = useLiveRooms();
+
+  const [selectedRoom, setSelectedRoom] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isNewKnowledgeOpen, setIsNewKnowledgeOpen] = useState(false);
   const [isNewRoomOpen, setIsNewRoomOpen] = useState(false);
-  const [newKnowledge, setNewKnowledge] = useState({ question: '', answer: '', source: '', roomId: 'none' });
-  const [newRoom, setNewRoom] = useState({ name: '' });
-  
+  const [newKnowledge, setNewKnowledge] = useState({
+    question: "",
+    answer: "",
+    source: "",
+    roomId: "none",
+  });
+  const [newRoom, setNewRoom] = useState({ name: "", platformId: "" });
+
   // 排序后的直播间列表，活跃的在前，归档的在后
   const sortedRooms = [...rooms].sort((a, b) => {
-    if (a.status === 'active' && b.status === 'archived') return -1;
-    if (a.status === 'archived' && b.status === 'active') return 1;
+    if (a.status === "active" && b.status === "archived") return -1;
+    if (a.status === "archived" && b.status === "active") return 1;
     return 0;
   });
 
-  const filteredDocuments = documents.filter(doc => {
-    const matchesRoom = selectedRoom === 'all' || doc.roomId === selectedRoom;
-    const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredDocuments = documents.filter((doc) => {
+    const matchesRoom = selectedRoom === "all" || doc.roomId === selectedRoom;
+    const matchesSearch = doc.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
     return matchesRoom && matchesSearch;
   });
 
-  const filteredKnowledge = knowledgeItems.filter(item => {
-    const matchesRoom = selectedRoom === 'all' || item.roomId === selectedRoom;
-    const matchesSearch = item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         item.answer.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredKnowledge = knowledgeItems.filter((item) => {
+    const matchesRoom = selectedRoom === "all" || item.roomId === selectedRoom;
+    const matchesSearch =
+      item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.answer.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesRoom && matchesSearch;
   });
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'processed':
-        return 'bg-green-100 text-green-800';
-      case 'processing':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'pending':
-        return 'bg-gray-100 text-gray-800';
+      case "processed":
+        return "bg-green-100 text-green-800";
+      case "processing":
+        return "bg-yellow-100 text-yellow-800";
+      case "pending":
+        return "bg-gray-100 text-gray-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'processed':
-        return '已挖掘';
-      case 'processing':
-        return '正在处理';
-      case 'pending':
-        return '待挖掘';
+      case "processed":
+        return "已挖掘";
+      case "processing":
+        return "正在处理";
+      case "pending":
+        return "待挖掘";
       default:
-        return '未知';
+        return "未知";
     }
   };
 
@@ -101,15 +153,15 @@ export function KnowledgeBasePage() {
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('zh-CN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return date.toLocaleDateString("zh-CN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const handleDeleteDocument = (id: string) => {
-    setDocuments(prev => prev.filter(doc => doc.id !== id));
+    setDocuments((prev) => prev.filter((doc) => doc.id !== id));
   };
 
   const handleCreateKnowledge = () => {
@@ -118,29 +170,32 @@ export function KnowledgeBasePage() {
         id: `knowledge-new-${Date.now()}`,
         question: newKnowledge.question,
         answer: newKnowledge.answer,
-        source: newKnowledge.source || '手动创建',
+        source: newKnowledge.source || "手动创建",
         upvotes: 0,
         downvotes: 0,
         usageCount: 0,
         createdAt: new Date(),
-        status: 'active',
-        roomId: newKnowledge.roomId && newKnowledge.roomId !== 'none' ? newKnowledge.roomId : undefined
+        status: "active",
+        roomId:
+          newKnowledge.roomId && newKnowledge.roomId !== "none"
+            ? newKnowledge.roomId
+            : undefined,
       };
-      
-      setKnowledgeItems(prev => [knowledge, ...prev]);
-      setNewKnowledge({ question: '', answer: '', source: '', roomId: 'none' });
+
+      setKnowledgeItems((prev) => [knowledge, ...prev]);
+      setNewKnowledge({ question: "", answer: "", source: "", roomId: "none" });
       setIsNewKnowledgeOpen(false);
     }
   };
 
-  const handleVoteKnowledge = (id: string, vote: 'up' | 'down') => {
-    setKnowledgeItems(prev => 
-      prev.map(item => 
-        item.id === id 
-          ? { 
-              ...item, 
-              upvotes: vote === 'up' ? item.upvotes + 1 : item.upvotes,
-              downvotes: vote === 'down' ? item.downvotes + 1 : item.downvotes
+  const handleVoteKnowledge = (id: string, vote: "up" | "down") => {
+    setKnowledgeItems((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              upvotes: vote === "up" ? item.upvotes + 1 : item.upvotes,
+              downvotes: vote === "down" ? item.downvotes + 1 : item.downvotes,
             }
           : item
       )
@@ -148,51 +203,92 @@ export function KnowledgeBasePage() {
   };
 
   const handleDeleteKnowledge = (id: string) => {
-    setKnowledgeItems(prev => prev.filter(item => item.id !== id));
+    setKnowledgeItems((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleCreateRoom = () => {
-    if (newRoom.name.trim()) {
-      const room: LiveRoom = {
-        id: `room-new-${Date.now()}`,
-        name: newRoom.name.trim(),
-        onlineCount: 0,
-        status: 'active'
-      };
-      
-      setRooms(prev => [...prev, room]);
-      setSelectedRoom(room.id); // 切换到新创建的场景
-      setNewRoom({ name: '' });
-      setIsNewRoomOpen(false);
+  const handleCreateRoom = async () => {
+    if (newRoom.name.trim() && newRoom.platformId.trim()) {
+      try {
+        const room = await createLiveRoom({
+          platform_id: newRoom.platformId.trim(),
+          name: newRoom.name.trim(),
+          status: "preparing",
+        });
+
+        if (room) {
+          await refreshLiveRooms(); // 刷新列表
+          setSelectedRoom(room.id); // 切换到新创建的直播间
+          setNewRoom({ name: "", platformId: "" });
+          setIsNewRoomOpen(false);
+          toast.success("直播间创建成功");
+        } else {
+          toast.error("创建直播间失败");
+        }
+      } catch (error) {
+        console.error("创建直播间失败:", error);
+        toast.error("创建直播间失败");
+      }
     }
   };
 
-  const handleDeleteRoom = (roomId: string) => {
-    // 删除场景时，同时清理相关的文档和知识库条目
-    setRooms(prev => prev.filter(room => room.id !== roomId));
-    setDocuments(prev => prev.filter(doc => doc.roomId !== roomId));
-    setKnowledgeItems(prev => prev.filter(item => item.roomId !== roomId));
-    
-    // 如果当前选中的是被删除的场景，则切换到"全部场景"
-    if (selectedRoom === roomId) {
-      setSelectedRoom('all');
+  const handleDeleteRoom = async (roomId: string) => {
+    try {
+      const success = await deleteLiveRoom(roomId);
+      if (success) {
+        // 删除场景时，同时清理相关的文档和知识库条目
+        setDocuments((prev) => prev.filter((doc) => doc.roomId !== roomId));
+        setKnowledgeItems((prev) =>
+          prev.filter((item) => item.roomId !== roomId)
+        );
+
+        // 如果当前选中的是被删除的场景，则切换到"全部场景"
+        if (selectedRoom === roomId) {
+          setSelectedRoom("all");
+        }
+
+        await refreshLiveRooms(); // 刷新列表
+        toast.success("直播间删除成功");
+      } else {
+        toast.error("删除直播间失败");
+      }
+    } catch (error) {
+      console.error("删除直播间失败:", error);
+      toast.error("删除直播间失败");
     }
   };
 
-  const handleArchiveRoom = (roomId: string) => {
-    setRooms(prev => prev.map(room => 
-      room.id === roomId ? { ...room, status: 'archived' } : room
-    ));
+  const handleArchiveRoom = async (roomId: string) => {
+    try {
+      const success = await updateLiveRoomStatus(roomId, "ended");
+      if (success) {
+        await refreshLiveRooms(); // 刷新列表
+        toast.success("直播间已归档");
+      } else {
+        toast.error("归档直播间失败");
+      }
+    } catch (error) {
+      console.error("归档直播间失败:", error);
+      toast.error("归档直播间失败");
+    }
   };
 
-  const handleRestoreRoom = (roomId: string) => {
-    setRooms(prev => prev.map(room => 
-      room.id === roomId ? { ...room, status: 'active' } : room
-    ));
+  const handleRestoreRoom = async (roomId: string) => {
+    try {
+      const success = await updateLiveRoomStatus(roomId, "living");
+      if (success) {
+        await refreshLiveRooms(); // 刷新列表
+        toast.success("直播间已恢复");
+      } else {
+        toast.error("恢复直播间失败");
+      }
+    } catch (error) {
+      console.error("恢复直播间失败:", error);
+      toast.error("恢复直播间失败");
+    }
   };
 
   const handleRoomSelectChange = (value: string) => {
-    if (value === 'create-new') {
+    if (value === "create-new") {
       setIsNewRoomOpen(true);
     } else {
       setSelectedRoom(value);
@@ -205,13 +301,18 @@ export function KnowledgeBasePage() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-xl font-semibold">知识库管理</h2>
-            <p className="text-sm text-muted-foreground">管理文档和Q&A知识，构建智能客服知识体系</p>
+            <p className="text-sm text-muted-foreground">
+              管理文档和Q&A知识，构建智能客服知识体系
+            </p>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <Select value={selectedRoom} onValueChange={handleRoomSelectChange}>
-                <SelectTrigger className="w-48">
+              <Select
+                value={selectedRoom}
+                onValueChange={handleRoomSelectChange}
+              >
+                <SelectTrigger className="w-[21rem]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -220,7 +321,7 @@ export function KnowledgeBasePage() {
                     <SelectItem key={room.id} value={room.id}>
                       <div className="flex items-center gap-2">
                         <span>{room.name}</span>
-                        {room.status === 'archived' && (
+                        {room.status === "archived" && (
                           <Badge variant="secondary" className="text-xs">
                             <Archive className="size-2 mr-1" />
                             归档
@@ -238,9 +339,9 @@ export function KnowledgeBasePage() {
                   </SelectItem>
                 </SelectContent>
               </Select>
-              
+
               {/* 场景管理下拉菜单 */}
-              {selectedRoom !== 'all' && selectedRoom !== 'create-new' && (
+              {selectedRoom !== "all" && selectedRoom !== "create-new" && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm">
@@ -248,14 +349,17 @@ export function KnowledgeBasePage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    {sortedRooms.find(room => room.id === selectedRoom)?.status === 'active' ? (
+                    {sortedRooms.find((room) => room.id === selectedRoom)
+                      ?.status === "active" ? (
                       <>
-                        <DropdownMenuItem onClick={() => handleArchiveRoom(selectedRoom)}>
+                        <DropdownMenuItem
+                          onClick={() => handleArchiveRoom(selectedRoom)}
+                        >
                           <Archive className="size-3 mr-2" />
                           归档场景
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => handleDeleteRoom(selectedRoom)}
                           className="text-destructive focus:text-destructive"
                         >
@@ -265,12 +369,14 @@ export function KnowledgeBasePage() {
                       </>
                     ) : (
                       <>
-                        <DropdownMenuItem onClick={() => handleRestoreRoom(selectedRoom)}>
+                        <DropdownMenuItem
+                          onClick={() => handleRestoreRoom(selectedRoom)}
+                        >
                           <ArchiveRestore className="size-3 mr-2" />
                           恢复场景
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => handleDeleteRoom(selectedRoom)}
                           className="text-destructive focus:text-destructive"
                         >
@@ -283,7 +389,7 @@ export function KnowledgeBasePage() {
                 </DropdownMenu>
               )}
             </div>
-            
+
             <div className="relative">
               <Search className="size-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -327,7 +433,10 @@ export function KnowledgeBasePage() {
                 <ScrollArea className="h-[600px]">
                   <div className="space-y-3">
                     {filteredDocuments.map((doc) => (
-                      <div key={doc.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                      <div
+                        key={doc.id}
+                        className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
+                      >
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-3 flex-1">
                             {getFileTypeIcon(doc.type)}
@@ -337,16 +446,25 @@ export function KnowledgeBasePage() {
                                 <span>{formatFileSize(doc.size)}</span>
                                 <span>上传于 {formatDate(doc.uploadDate)}</span>
                                 {doc.extractedQACount > 0 && (
-                                  <span>已提取 {doc.extractedQACount} 条Q&A</span>
+                                  <span>
+                                    已提取 {doc.extractedQACount} 条Q&A
+                                  </span>
                                 )}
                               </div>
                               {doc.roomId && (
                                 <div className="flex items-center gap-2 mt-2">
                                   <Badge variant="outline">
-                                    {rooms.find(r => r.id === doc.roomId)?.name}
+                                    {
+                                      rooms.find((r) => r.id === doc.roomId)
+                                        ?.name
+                                    }
                                   </Badge>
-                                  {rooms.find(r => r.id === doc.roomId)?.status === 'archived' && (
-                                    <Badge variant="secondary" className="text-xs">
+                                  {rooms.find((r) => r.id === doc.roomId)
+                                    ?.status === "archived" && (
+                                    <Badge
+                                      variant="secondary"
+                                      className="text-xs"
+                                    >
                                       <Archive className="size-2 mr-1" />
                                       归档
                                     </Badge>
@@ -355,10 +473,10 @@ export function KnowledgeBasePage() {
                               )}
                             </div>
                           </div>
-                          
+
                           <div className="flex items-center gap-2">
-                            <Badge 
-                              variant="secondary" 
+                            <Badge
+                              variant="secondary"
                               className={getStatusColor(doc.status)}
                             >
                               {getStatusLabel(doc.status)}
@@ -366,8 +484,8 @@ export function KnowledgeBasePage() {
                             <Button variant="outline" size="sm">
                               <Download className="size-4" />
                             </Button>
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
                               onClick={() => handleDeleteDocument(doc.id)}
                             >
@@ -388,14 +506,20 @@ export function KnowledgeBasePage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Q&A知识库</CardTitle>
-                  <Dialog open={isNewKnowledgeOpen} onOpenChange={setIsNewKnowledgeOpen}>
+                  <Dialog
+                    open={isNewKnowledgeOpen}
+                    onOpenChange={setIsNewKnowledgeOpen}
+                  >
                     <DialogTrigger asChild>
-                      <Button 
+                      <Button
                         className="gap-2"
                         onClick={() => {
                           // 如果已选择特定场景，自动带入场景
-                          if (selectedRoom !== 'all') {
-                            setNewKnowledge(prev => ({ ...prev, roomId: selectedRoom }));
+                          if (selectedRoom !== "all") {
+                            setNewKnowledge((prev) => ({
+                              ...prev,
+                              roomId: selectedRoom,
+                            }));
                           }
                         }}
                       >
@@ -416,7 +540,12 @@ export function KnowledgeBasePage() {
                           <Textarea
                             placeholder="输入问题内容..."
                             value={newKnowledge.question}
-                            onChange={(e) => setNewKnowledge(prev => ({ ...prev, question: e.target.value }))}
+                            onChange={(e) =>
+                              setNewKnowledge((prev) => ({
+                                ...prev,
+                                question: e.target.value,
+                              }))
+                            }
                             className="mt-1"
                           />
                         </div>
@@ -425,26 +554,40 @@ export function KnowledgeBasePage() {
                           <Textarea
                             placeholder="输入回答内容..."
                             value={newKnowledge.answer}
-                            onChange={(e) => setNewKnowledge(prev => ({ ...prev, answer: e.target.value }))}
+                            onChange={(e) =>
+                              setNewKnowledge((prev) => ({
+                                ...prev,
+                                answer: e.target.value,
+                              }))
+                            }
                             className="mt-1 min-h-[120px]"
                           />
                         </div>
                         <div>
-                          <label className="text-sm font-medium">所属场景</label>
-                          <Select 
-                            value={newKnowledge.roomId} 
-                            onValueChange={(value) => setNewKnowledge(prev => ({ ...prev, roomId: value }))}
+                          <label className="text-sm font-medium">
+                            所属场景
+                          </label>
+                          <Select
+                            value={newKnowledge.roomId}
+                            onValueChange={(value) =>
+                              setNewKnowledge((prev) => ({
+                                ...prev,
+                                roomId: value,
+                              }))
+                            }
                           >
                             <SelectTrigger className="mt-1">
                               <SelectValue placeholder="选择场景..." />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="none">不指定场景</SelectItem>
-                              {sortedRooms.filter(room => room.status === 'active').map((room) => (
-                                <SelectItem key={room.id} value={room.id}>
-                                  {room.name}
-                                </SelectItem>
-                              ))}
+                              {sortedRooms
+                                .filter((room) => room.status === "active")
+                                .map((room) => (
+                                  <SelectItem key={room.id} value={room.id}>
+                                    {room.name}
+                                  </SelectItem>
+                                ))}
                             </SelectContent>
                           </Select>
                           <p className="text-xs text-muted-foreground mt-1">
@@ -456,7 +599,12 @@ export function KnowledgeBasePage() {
                           <Input
                             placeholder="输入来源信息..."
                             value={newKnowledge.source}
-                            onChange={(e) => setNewKnowledge(prev => ({ ...prev, source: e.target.value }))}
+                            onChange={(e) =>
+                              setNewKnowledge((prev) => ({
+                                ...prev,
+                                source: e.target.value,
+                              }))
+                            }
                             className="mt-1"
                           />
                         </div>
@@ -465,14 +613,17 @@ export function KnowledgeBasePage() {
                             variant="outline"
                             onClick={() => {
                               setIsNewKnowledgeOpen(false);
-                              setNewKnowledge({ question: '', answer: '', source: '', roomId: 'none' });
+                              setNewKnowledge({
+                                question: "",
+                                answer: "",
+                                source: "",
+                                roomId: "none",
+                              });
                             }}
                           >
                             取消
                           </Button>
-                          <Button onClick={handleCreateKnowledge}>
-                            创建
-                          </Button>
+                          <Button onClick={handleCreateKnowledge}>创建</Button>
                         </div>
                       </div>
                     </DialogContent>
@@ -483,22 +634,31 @@ export function KnowledgeBasePage() {
                 <ScrollArea className="h-[600px]">
                   <div className="space-y-4">
                     {filteredKnowledge.map((item) => (
-                      <div key={item.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                      <div
+                        key={item.id}
+                        className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
+                      >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2">
-                            <Badge variant={item.status === 'active' ? 'default' : 'secondary'}>
-                              {item.status === 'active' ? '启用' : '禁用'}
+                            <Badge
+                              variant={
+                                item.status === "active"
+                                  ? "default"
+                                  : "secondary"
+                              }
+                            >
+                              {item.status === "active" ? "启用" : "禁用"}
                             </Badge>
                             <span className="text-xs text-muted-foreground">
                               来源：{item.source}
                             </span>
                           </div>
-                          
+
                           <div className="flex items-center gap-1">
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleVoteKnowledge(item.id, 'up')}
+                              onClick={() => handleVoteKnowledge(item.id, "up")}
                               className="gap-1"
                             >
                               <ThumbsUp className="size-3" />
@@ -507,7 +667,9 @@ export function KnowledgeBasePage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleVoteKnowledge(item.id, 'down')}
+                              onClick={() =>
+                                handleVoteKnowledge(item.id, "down")
+                              }
                               className="gap-1"
                             >
                               <ThumbsDown className="size-3" />
@@ -516,8 +678,8 @@ export function KnowledgeBasePage() {
                             <Button variant="outline" size="sm">
                               <Edit className="size-3" />
                             </Button>
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
                               onClick={() => handleDeleteKnowledge(item.id)}
                             >
@@ -525,18 +687,22 @@ export function KnowledgeBasePage() {
                             </Button>
                           </div>
                         </div>
-                        
+
                         <div className="space-y-2">
                           <div>
                             <span className="text-sm font-medium">问：</span>
-                            <p className="text-sm text-foreground mt-1">{item.question}</p>
+                            <p className="text-sm text-foreground mt-1">
+                              {item.question}
+                            </p>
                           </div>
                           <div>
                             <span className="text-sm font-medium">答：</span>
-                            <p className="text-sm text-muted-foreground mt-1">{item.answer}</p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {item.answer}
+                            </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
                           <div className="flex items-center gap-4">
                             <span className="flex items-center gap-1">
@@ -551,9 +717,10 @@ export function KnowledgeBasePage() {
                           {item.roomId && (
                             <div className="flex items-center gap-2">
                               <Badge variant="outline">
-                                {rooms.find(r => r.id === item.roomId)?.name}
+                                {rooms.find((r) => r.id === item.roomId)?.name}
                               </Badge>
-                              {rooms.find(r => r.id === item.roomId)?.status === 'archived' && (
+                              {rooms.find((r) => r.id === item.roomId)
+                                ?.status === "archived" && (
                                 <Badge variant="secondary" className="text-xs">
                                   <Archive className="size-2 mr-1" />
                                   归档
@@ -577,47 +744,64 @@ export function KnowledgeBasePage() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Settings className="size-4" />
-                新建场景
+                新建直播间
               </DialogTitle>
               <DialogDescription>
-                创建一个新的直播场景，用于分类管理相关的知识库内容
+                创建一个新的直播间，用于管理直播相关的知识库内容
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium">场景名称</label>
+                <label className="text-sm font-medium">直播间名称</label>
                 <Input
-                  placeholder="输入场景名称..."
+                  placeholder="输入直播间名称..."
                   value={newRoom.name}
-                  onChange={(e) => setNewRoom({ name: e.target.value })}
+                  onChange={(e) =>
+                    setNewRoom({ ...newRoom, name: e.target.value })
+                  }
+                  className="mt-1"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  例如：美妆直播间、数码科技等
+                </p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">平台ID</label>
+                <Input
+                  placeholder="输入平台直播间ID..."
+                  value={newRoom.platformId}
+                  onChange={(e) =>
+                    setNewRoom({ ...newRoom, platformId: e.target.value })
+                  }
                   className="mt-1"
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === "Enter") {
                       e.preventDefault();
                       handleCreateRoom();
                     }
                   }}
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  例如：淘宝直播间、抖音直播间、产品咨询等
+                  平台的直播间唯一标识符
                 </p>
               </div>
-              
+
               <div className="flex justify-end gap-2">
                 <Button
                   variant="outline"
                   onClick={() => {
                     setIsNewRoomOpen(false);
-                    setNewRoom({ name: '' });
+                    setNewRoom({ name: "", platformId: "" });
                   }}
                 >
                   取消
                 </Button>
-                <Button 
+                <Button
                   onClick={handleCreateRoom}
-                  disabled={!newRoom.name.trim()}
+                  disabled={!newRoom.name.trim() || !newRoom.platformId.trim()}
                 >
-                  创建场景
+                  创建直播间
                 </Button>
               </div>
             </div>
