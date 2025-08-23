@@ -20,7 +20,7 @@ import {
   User,
   UserRole,
   Permission,
-} from "../types";
+} from "@/types";
 
 const liveRooms: LiveRoom[] = [
   { id: "1", name: "美妆直播间", onlineCount: 2543, status: "active" },

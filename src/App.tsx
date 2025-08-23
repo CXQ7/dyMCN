@@ -1,36 +1,36 @@
 import { useState, useEffect, Suspense, lazy } from "react";
-import { Navigation } from "./components/Navigation";
-import { LoginPage } from "./pages/LoginPage";
+import { Navigation } from "@/components/Navigation";
+import { LoginPage } from "@/pages/LoginPage";
 import {
   generateManualReplies,
   generateSystemSettings,
-} from "./utils/mockData";
-import { User } from "./types";
-import { useTheme } from "./components/ThemeProvider";
-import { Toaster } from "./components/ui/sonner";
-import { liveRoomMonitor } from "./src/dycast/services/liveRoomMonitor";
+} from "@/utils/mockData";
+import { User } from "@/types";
+import { useTheme } from "@/components/ThemeProvider";
+import { Toaster } from "@/components/ui/sonner";
+import { liveRoomMonitor } from "@/dycast/services/liveRoomMonitor";
 import { toast } from "sonner";
-import { useLiveRooms } from "./src/hooks/useLiveRooms";
-import { useRealData } from "./src/hooks/useRealData";
+import { useLiveRooms } from "@/hooks/useLiveRooms";
+import { useRealData } from "@/hooks/useRealData";
 
 const DashboardPage = lazy(() =>
-  import("./pages/DashboardPage").then((m) => ({ default: m.DashboardPage }))
+  import("@/pages/DashboardPage").then((m) => ({ default: m.DashboardPage }))
 );
 const CustomerServicePage = lazy(() =>
-  import("./pages/CustomerServicePage").then((m) => ({
+  import("@/pages/CustomerServicePage").then((m) => ({
     default: m.CustomerServicePage,
   }))
 );
 const KnowledgeBasePage = lazy(() =>
-  import("./pages/KnowledgeBasePage").then((m) => ({
+  import("@/pages/KnowledgeBasePage").then((m) => ({
     default: m.KnowledgeBasePage,
   }))
 );
 const SettingsPage = lazy(() =>
-  import("./pages/SettingsPage").then((m) => ({ default: m.SettingsPage }))
+  import("@/pages/SettingsPage").then((m) => ({ default: m.SettingsPage }))
 );
 const DycastPage = lazy(() =>
-  import("./pages/DycastPage").then((m) => ({ default: m.DycastPage }))
+  import("@/pages/DycastPage").then((m) => ({ default: m.DycastPage }))
 );
 
 function AppInner() {

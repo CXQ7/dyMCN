@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
-import { LiveRoom } from "../../types";
-import { getAllLiveRooms, getActiveLiveRooms } from "../lib/liveRoomService";
+import { LiveRoom } from "@/types";
+import {
+  getAllLiveRooms,
+  getActiveLiveRooms,
+} from "@/services/liveRoomService";
 import { useOnlineCounts } from "./useOnlineCounts";
 
 export function useLiveRooms(activeOnly: boolean = false) {

@@ -1,5 +1,5 @@
 import React from "react";
-import { DycastPanel } from "../src/dycast/components/DycastPanel";
+import { DycastPanel } from "@/dycast/components/DycastPanel";
 
 export function DycastPage() {
   return (

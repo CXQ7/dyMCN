@@ -1,6 +1,6 @@
-import { CLog } from '../utils/logUtil';
-import { Emitter, type EventMap } from './emitter';
-import pako from 'pako';
+import { CLog } from "../utils/logUtil";
+import { Emitter, type EventMap } from "./emitter";
+import pako from "pako";
 import {
   decodeChatMessage,
   decodeControlMessage,
@@ -14,18 +14,18 @@ import {
   decodeRoomStatsMessage,
   decodeRoomUserSeqMessage,
   decodeSocialMessage,
-  encodePushFrame
-} from './model';
+  encodePushFrame,
+} from "./model";
 import type {
   GiftStruct,
   Message,
   RoomRankMessage_RoomRank,
   RoomUserSeqMessage_Contributor,
   Text,
-  User
-} from './model';
-import { getImInfo, getLiveInfo } from './request';
-import { getSignature } from './signature';
+  User,
+} from "./model";
+import { getImInfo, getLiveInfo } from "./request";
+import { getSignature } from "./signature";
 
 /**
  * 连接状态
@@ -123,7 +123,7 @@ export interface CastGift {
  */
 export enum CastRtfContentType {
   TEXT = 1,
-  EMOJI = 2
+  EMOJI = 2,
 }
 
 // 富文本
@@ -145,20 +145,20 @@ export interface DyMessage {
 }
 
 export enum CastMethod {
-  CHAT = 'WebcastChatMessage',
-  GIFT = 'WebcastGiftMessage',
-  LIKE = 'WebcastLikeMessage',
-  MEMBER = 'WebcastMemberMessage',
-  SOCIAL = 'WebcastSocialMessage',
-  ROOM_USER_SEQ = 'WebcastRoomUserSeqMessage',
-  CONTROL = 'WebcastControlMessage',
-  ROOM_RANK = 'WebcastRoomRankMessage',
-  ROOM_STATS = 'WebcastRoomStatsMessage',
-  EMOJI_CHAT = 'WebcastEmojiChatMessage',
-  FANSCLUB = 'WebcastFansclubMessage',
-  ROOM_DATA_SYNC = 'WebcastRoomDataSyncMessage',
+  CHAT = "WebcastChatMessage",
+  GIFT = "WebcastGiftMessage",
+  LIKE = "WebcastLikeMessage",
+  MEMBER = "WebcastMemberMessage",
+  SOCIAL = "WebcastSocialMessage",
+  ROOM_USER_SEQ = "WebcastRoomUserSeqMessage",
+  CONTROL = "WebcastControlMessage",
+  ROOM_RANK = "WebcastRoomRankMessage",
+  ROOM_STATS = "WebcastRoomStatsMessage",
+  EMOJI_CHAT = "WebcastEmojiChatMessage",
+  FANSCLUB = "WebcastFansclubMessage",
+  ROOM_DATA_SYNC = "WebcastRoomDataSyncMessage",
   /** 自定义消息 */
-  CUSTOM = 'CustomMessage'
+  CUSTOM = "CustomMessage",
 }
 
 /**
@@ -168,7 +168,7 @@ export enum RoomStatus {
   PREPARE = 1,
   LIVING = 2,
   PAUSE = 3,
-  END = 4
+  END = 4,
 }
 /** 客户端状态 */
 enum WSRoomStatus {
@@ -181,7 +181,7 @@ enum WSRoomStatus {
   /** 重连中 */
   RECONNECTING = 4,
   /** 已关闭 */
-  CLOSED = 5
+  CLOSED = 5,
 }
 
 /**
@@ -214,7 +214,11 @@ interface DyCastEvent extends EventMap {
    */
   message: (messages: DyMessage[]) => void;
   /** 重连中 */
-  reconnecting: (count?: number, code?: DyCastCloseCode, reason?: string) => void;
+  reconnecting: (
+    count?: number,
+    code?: DyCastCloseCode,
+    reason?: string
+  ) => void;
   /** 重连完成 */
   reconnect: (ev?: Event) => void;
 }
@@ -243,7 +247,7 @@ export enum DyCastCloseCode {
   /** 无法正常接收信息 */
   CANNOT_RECEIVE = 4003,
   /** 因重连关闭 */
-  RECONNECTING = 4004
+  RECONNECTING = 4004,
 }
 
 // 配置
@@ -298,51 +302,54 @@ interface DyCastCloseEvent {
 
 // 消息体类型
 enum PayloadType {
-  Ack = 'ack',
-  Close = 'close',
-  Hb = 'hb',
-  Msg = 'msg'
+  Ack = "ack",
+  Close = "close",
+  Hb = "hb",
+  Msg = "msg",
 }
 
 /** API */
 // const BASE_URL = 'wss://webcast5-ws-web-lf.douyin.com/webcast/im/push/v2/';
-const BASE_URL = `${location.origin.replace(/^http/, 'ws')}/socket/webcast/im/push/v2/`;
+const BASE_URL = `${location.origin.replace(
+  /^http/,
+  "ws"
+)}/socket/webcast/im/push/v2/`;
 
 /** SDK 版本 */
-const VERSION = '1.0.14-beta.0';
+const VERSION = "1.0.14-beta.0";
 
 /**
  * 默认配置
  */
 const defaultOpts: Partial<DyCastOptions> = {
-  aid: '6383',
-  app_name: 'douyin_web',
-  browser_language: 'zh-CN',
-  browser_name: 'Mozilla',
+  aid: "6383",
+  app_name: "douyin_web",
+  browser_language: "zh-CN",
+  browser_name: "Mozilla",
   browser_online: true,
-  browser_platform: 'Win32',
+  browser_platform: "Win32",
   browser_version:
-    '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
-  compress: 'gzip',
+    "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
+  compress: "gzip",
   cookie_enabled: true,
-  device_platform: 'web',
+  device_platform: "web",
   did_rule: 3,
-  endpoint: 'live_pc',
-  heartbeatDuration: '0',
-  host: 'https://live.douyin.com',
-  identity: 'audience',
-  im_path: '/webcast/im/fetch/',
-  insert_task_id: '',
+  endpoint: "live_pc",
+  heartbeatDuration: "0",
+  host: "https://live.douyin.com",
+  identity: "audience",
+  im_path: "/webcast/im/fetch/",
+  insert_task_id: "",
   live_id: 1,
-  live_reason: '',
-  need_persist_msg_count: '15',
+  live_reason: "",
+  need_persist_msg_count: "15",
   screen_height: 1080,
   screen_width: 1920,
   support_wrds: 1,
-  tz_name: 'Asia/Shanghai',
+  tz_name: "Asia/Shanghai",
   update_version_code: VERSION,
-  version_code: '180800',
-  webcast_sdk_version: VERSION
+  version_code: "180800",
+  webcast_sdk_version: VERSION,
 };
 
 export class DyCast {
@@ -383,7 +390,7 @@ export class DyCast {
   // 即 如果 10000 ms 内都没接收到新消息，证明消息接收出错
   private downgradePingCount: number = 2;
 
-  private pingTimer: number | undefined = void 0;
+  private pingTimer: ReturnType<typeof setTimeout> | undefined = void 0;
 
   // 上次接收时间
   private lastReceiveTime: number;
@@ -418,9 +425,9 @@ export class DyCast {
     this.pingCount = 0;
     this.downgradePingCount = 2;
     this.cursor = {
-      cursor: '',
-      firstCursor: '',
-      internalExt: ''
+      cursor: "",
+      firstCursor: "",
+      internalExt: "",
     };
     // 当前重连次数
     this.reconnectCount = 0;
@@ -435,15 +442,15 @@ export class DyCast {
      * 默认情况
      *  - 即未收到预期的状态码
      */
-    this.closeEvent = { code: 1005, msg: 'CLOSE_NO_STATUS' };
+    this.closeEvent = { code: 1005, msg: "CLOSE_NO_STATUS" };
     this.info = {
-      roomId: '',
-      uniqueId: '',
-      avatar: '',
-      cover: '',
-      nickname: '',
-      title: '',
-      status: 4
+      roomId: "",
+      uniqueId: "",
+      avatar: "",
+      cover: "",
+      nickname: "",
+      title: "",
+      status: 4,
     };
     this.imInfo = {};
     this.status = RoomStatus.END;
@@ -486,7 +493,7 @@ export class DyCast {
   public async connect() {
     try {
       if (this.state) {
-        this.emitter.emit('error', Error('已连接，请勿重复连接'));
+        this.emitter.emit("error", Error("已连接，请勿重复连接"));
         return;
       }
       await this.fetchConnectInfo(this.roomNum);
@@ -499,16 +506,20 @@ export class DyCast {
         // 主播未开播
         const liveStatus = this.getLiveStatus();
         this.wsRoomStatus = WSRoomStatus.CLOSED;
-        this.emitter.emit('close', DyCastCloseCode.LIVE_END, liveStatus.msg);
+        this.emitter.emit("close", DyCastCloseCode.LIVE_END, liveStatus.msg);
       }
     } catch (err) {
       // 过程错误
-      CLog.error('房间连接前错误 =>', err);
+      CLog.error("房间连接前错误 =>", err);
       // 关闭
-      this.emitter.emit('close', DyCastCloseCode.CONNECTING_ERROR, '房间连接前出错');
+      this.emitter.emit(
+        "close",
+        DyCastCloseCode.CONNECTING_ERROR,
+        "房间连接前出错"
+      );
       this._afterClose();
       // 报错
-      this.emitter.emit('error', err as Error);
+      this.emitter.emit("error", err as Error);
     }
   }
 
@@ -528,45 +539,49 @@ export class DyCast {
     this.options = opts;
     this.url = this._getSocketUrl(opts);
     this.cursor = {
-      cursor: '',
+      cursor: "",
       firstCursor: opts.cursor,
-      internalExt: opts.internal_ext
+      internalExt: opts.internal_ext,
     };
     this.lastReceiveTime = Date.now();
     this.pingCount = 0;
     try {
       this.ws = new WebSocket(this.url);
-      this.ws.binaryType = 'arraybuffer';
-      this.ws.addEventListener('open', (ev: Event) => {
+      this.ws.binaryType = "arraybuffer";
+      this.ws.addEventListener("open", (ev: Event) => {
         // 可能初次打开，也可能是重连打开
         if (this.reconnectCount > 0) {
           // 重连成功
           this.reconnectCount = 0;
-          this.emitter.emit('reconnect', ev);
+          this.emitter.emit("reconnect", ev);
         } else {
           // 初次连接
-          this.emitter.emit('open', ev, this.info);
+          this.emitter.emit("open", ev, this.info);
         }
         this.ping();
         this._afterOpen();
       });
-      this.ws.addEventListener('close', (ev: CloseEvent) => {
+      this.ws.addEventListener("close", (ev: CloseEvent) => {
         this.handleClose(ev);
       });
-      this.ws.addEventListener('error', (ev: Event) => {
-        this.emitter.emit('error', Error(ev.type || 'Unknown Error'));
+      this.ws.addEventListener("error", (ev: Event) => {
+        this.emitter.emit("error", Error(ev.type || "Unknown Error"));
       });
-      this.ws.addEventListener('message', (ev: MessageEvent) => {
+      this.ws.addEventListener("message", (ev: MessageEvent) => {
         this.handleMessage(ev.data);
       });
     } catch (err) {
-      CLog.error('房间连接过程错误 =>', err);
+      CLog.error("房间连接过程错误 =>", err);
       // 可能原因为 WebSocket 不可用
       // 关闭
-      this.emitter.emit('close', DyCastCloseCode.CONNECTING_ERROR, '房间连接过程出错');
+      this.emitter.emit(
+        "close",
+        DyCastCloseCode.CONNECTING_ERROR,
+        "房间连接过程出错"
+      );
       this._afterClose();
       // 报错
-      this.emitter.emit('error', err as Error);
+      this.emitter.emit("error", err as Error);
     }
   }
 
@@ -578,7 +593,7 @@ export class DyCast {
       case DyCastCloseCode.NO_STATUS:
       case DyCastCloseCode.ABNORMAL:
         code = this.closeEvent.code || code;
-        msg = this.closeEvent.msg || msg || 'closed';
+        msg = this.closeEvent.msg || msg || "closed";
         break;
     }
     this._afterClose();
@@ -587,7 +602,7 @@ export class DyCast {
       this.reconnect();
     } else {
       // 正常关闭
-      this.emitter.emit('close', code, msg);
+      this.emitter.emit("close", code, msg);
     }
   }
 
@@ -626,7 +641,7 @@ export class DyCast {
       }
       if (frame.payloadType === PayloadType.Close) {
         // 关闭连接
-        this.close(DyCastCloseCode.NORMAL, 'Close By PayloadType');
+        this.close(DyCastCloseCode.NORMAL, "Close By PayloadType");
       }
     }
   }
@@ -637,21 +652,21 @@ export class DyCast {
   private reconnect() {
     // 还未关闭
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.close(DyCastCloseCode.RECONNECTING, '因重连而关闭');
+      this.close(DyCastCloseCode.RECONNECTING, "因重连而关闭");
     }
     this.shouldReconnect = !1;
     const opts: DyCastOptions = Object.assign({}, this.options, {
       cursor: this.cursor.cursor,
-      internal_ext: this.cursor.internalExt
+      internal_ext: this.cursor.internalExt,
     });
     this.reconnectCount++;
     if (this.reconnectCount > this.maxReconnectCount) {
-      CLog.error('已超过最大重连次数，请稍后重试');
-      this.emitter.emit('error', Error('已超过最大重连次数，请稍后重试'));
+      CLog.error("已超过最大重连次数，请稍后重试");
+      this.emitter.emit("error", Error("已超过最大重连次数，请稍后重试"));
       return;
     }
     this.wsRoomStatus = WSRoomStatus.RECONNECTING;
-    this.emitter.emit('reconnecting', this.reconnectCount);
+    this.emitter.emit("reconnecting", this.reconnectCount);
     this.isReconnecting = true;
     this._connect(opts);
   }
@@ -659,7 +674,7 @@ export class DyCast {
   /**
    * 关闭
    */
-  public close(code: number = 1005, reason: string = 'close') {
+  public close(code: number = 1005, reason: string = "close") {
     if (this.ws) {
       this.state = !1;
       this.closeEvent = { code, msg: reason };
@@ -690,7 +705,7 @@ export class DyCast {
       }, dur);
     } catch (err) {
       // 发送过程出错
-      CLog.error('DyCast Ping Error =>', err);
+      CLog.error("DyCast Ping Error =>", err);
     }
   }
 
@@ -700,11 +715,16 @@ export class DyCast {
    */
   private cannotReceiveMessage() {
     // 先关闭
-    this.close(DyCastCloseCode.CANNOT_RECEIVE, '客户端无法正常接收信息');
+    this.close(DyCastCloseCode.CANNOT_RECEIVE, "客户端无法正常接收信息");
     let tmp = Date.now() - this.lastReceiveTime;
     CLog.error(`DyCast Cannot Receive Message => after ${tmp} ms`);
     // 重连
-    this.emitter.emit('reconnecting', this.reconnectCount, DyCastCloseCode.CANNOT_RECEIVE, '客户端无法正常接收信息');
+    this.emitter.emit(
+      "reconnecting",
+      this.reconnectCount,
+      DyCastCloseCode.CANNOT_RECEIVE,
+      "客户端无法正常接收信息"
+    );
     this.reconnectCount < this.maxReconnectCount && (this.shouldReconnect = !0);
   }
 
@@ -734,7 +754,7 @@ export class DyCast {
       }
     } catch (err) {}
     if (!messages.length) return;
-    this.emitter.emit('message', messages);
+    this.emitter.emit("message", messages);
   }
 
   /**
@@ -763,7 +783,11 @@ export class DyCast {
           message = decodeGiftMessage(payload);
           data.method = CastMethod.GIFT;
           data.user = this._getCastUser(message.user);
-          data.gift = this._getCastGift(message.gift, message.repeatCount || message.comboCount, message.repeatEnd);
+          data.gift = this._getCastGift(
+            message.gift,
+            message.repeatCount || message.comboCount,
+            message.repeatEnd
+          );
           break;
         case CastMethod.LIKE:
           message = decodeLikeMessage(payload);
@@ -776,14 +800,14 @@ export class DyCast {
           message = decodeMemberMessage(payload);
           data.method = CastMethod.MEMBER;
           data.user = this._getCastUser(message.user);
-          data.content = '进入直播间';
+          data.content = "进入直播间";
           data.room = { audienceCount: message.memberCount };
           break;
         case CastMethod.SOCIAL:
           message = decodeSocialMessage(payload);
           data.method = CastMethod.SOCIAL;
           data.user = this._getCastUser(message.user);
-          data.content = '关注了主播';
+          data.content = "关注了主播";
           data.room = { followCount: message.followCount };
           break;
         case CastMethod.EMOJI_CHAT:
@@ -796,13 +820,16 @@ export class DyCast {
           message = decodeRoomUserSeqMessage(payload);
           data.method = CastMethod.ROOM_USER_SEQ;
           data.rank = this._getCastRanksA(message.ranks);
-          data.room = { audienceCount: message.total, totalUserCount: message.totalUser };
+          data.room = {
+            audienceCount: message.total,
+            totalUserCount: message.totalUser,
+          };
           break;
         case CastMethod.CONTROL:
           message = decodeControlMessage(payload);
           data.method = CastMethod.CONTROL;
           data.content = message.common?.describe;
-          data.room = { status: parseInt(message.action || '') || void 0 };
+          data.room = { status: parseInt(message.action || "") || void 0 };
           break;
         case CastMethod.ROOM_RANK:
           message = decodeRoomRankMessage(payload);
@@ -827,15 +854,17 @@ export class DyCast {
    * 获取当前的送礼榜单
    * @param data
    */
-  private _getCastRanksA(data?: RoomUserSeqMessage_Contributor[]): LiveRankItem[] | undefined {
+  private _getCastRanksA(
+    data?: RoomUserSeqMessage_Contributor[]
+  ): LiveRankItem[] | undefined {
     if (!data || !data.length) return void 0;
     const list: LiveRankItem[] = [];
     for (let i = 0; i < data.length; i++) {
       const item = data[i];
       list.push({
-        avatar: item.user?.avatarThumb?.urlList?.[0] || '',
-        nickname: item.user?.nickname || '',
-        rank: item.rank || i + 1
+        avatar: item.user?.avatarThumb?.urlList?.[0] || "",
+        nickname: item.user?.nickname || "",
+        rank: item.rank || i + 1,
       });
     }
     return list;
@@ -845,15 +874,17 @@ export class DyCast {
    * 获取当前的送礼榜单
    * @param data
    */
-  private _getCastRanksB(data?: RoomRankMessage_RoomRank[]): LiveRankItem[] | undefined {
+  private _getCastRanksB(
+    data?: RoomRankMessage_RoomRank[]
+  ): LiveRankItem[] | undefined {
     if (!data || !data.length) return void 0;
     const list: LiveRankItem[] = [];
     for (let i = 0; i < data.length; i++) {
       const item = data[i];
       list.push({
-        avatar: item.user?.avatarThumb?.urlList?.[0] || '',
-        nickname: item.user?.nickname || '',
-        rank: item.scoreStr || i + 1
+        avatar: item.user?.avatarThumb?.urlList?.[0] || "",
+        nickname: item.user?.nickname || "",
+        rank: item.scoreStr || i + 1,
       });
     }
     return list;
@@ -870,7 +901,7 @@ export class DyCast {
       id: data.secUid,
       name: data.nickname,
       gender: data.gender,
-      avatar: data.avatarThumb?.urlList?.[0]
+      avatar: data.avatarThumb?.urlList?.[0],
     };
   }
 
@@ -879,7 +910,11 @@ export class DyCast {
    * @param data
    * @returns
    */
-  private _getCastGift(data?: GiftStruct, count?: string, end?: number): CastGift | undefined {
+  private _getCastGift(
+    data?: GiftStruct,
+    count?: string,
+    end?: number
+  ): CastGift | undefined {
     if (!data) return void 0;
     return {
       id: data.id,
@@ -889,7 +924,7 @@ export class DyCast {
       desc: data.describe,
       icon: data.image?.urlList?.[0],
       count: count,
-      repeatEnd: end
+      repeatEnd: end,
     };
   }
 
@@ -917,7 +952,7 @@ export class DyCast {
       if (!pieces[i].imageValue) {
         list.push({
           type: CastRtfContentType.TEXT,
-          text: pieces[i].stringValue
+          text: pieces[i].stringValue,
         });
       } else {
         let url = pieces[i].imageValue?.image?.urlList?.[0];
@@ -925,7 +960,7 @@ export class DyCast {
         list.push({
           type: CastRtfContentType.EMOJI,
           text: name,
-          url
+          url,
         });
       }
     }
@@ -940,19 +975,19 @@ export class DyCast {
     const frame = decodePushFrame(data);
     let payload = frame.payload;
     const headers = frame.headersList;
-    let cursor = '';
-    let internalExt = '';
+    let cursor = "";
+    let internalExt = "";
     let needAck = !1;
     if (!payload) return null;
     if (headers) {
-      if (headers['compress_type'] && headers['compress_type'] === 'gzip') {
+      if (headers["compress_type"] && headers["compress_type"] === "gzip") {
         payload = pako.ungzip(payload);
       }
-      if (headers['im-cursor']) {
-        cursor = headers['im-cursor'];
+      if (headers["im-cursor"]) {
+        cursor = headers["im-cursor"];
       }
-      if (headers['im-internal_ext']) {
-        internalExt = headers['im-internal_ext'];
+      if (headers["im-internal_ext"]) {
+        internalExt = headers["im-internal_ext"];
       }
     }
     const res = decodeResponse(payload);
@@ -964,14 +999,14 @@ export class DyCast {
       frame,
       cursor,
       needAck,
-      internalExt
+      internalExt,
     };
   }
 
   /** 心跳数据 */
   private _ping() {
     return encodePushFrame({
-      payloadType: PayloadType.Hb
+      payloadType: PayloadType.Hb,
     });
   }
 
@@ -980,7 +1015,7 @@ export class DyCast {
    * @param ext Frame im-internal_ext | Response internalExt
    * @param logId
    */
-  private _ack(ext: string = '', logId?: string) {
+  private _ack(ext: string = "", logId?: string) {
     const getPayload = function (_ext: string) {
       let arr = [];
       for (let s of _ext) {
@@ -990,14 +1025,16 @@ export class DyCast {
           : index < 2048
           ? (arr.push(192 + (index >> 6)), arr.push(128 + (63 & index)))
           : index < 65536 &&
-            (arr.push(224 + (index >> 12)), arr.push(128 + ((index >> 6) & 63)), arr.push(128 + (63 & index)));
+            (arr.push(224 + (index >> 12)),
+            arr.push(128 + ((index >> 6) & 63)),
+            arr.push(128 + (63 & index)));
       }
       return new Uint8Array(arr);
     };
     return encodePushFrame({
       payloadType: PayloadType.Ack,
       payload: getPayload(ext),
-      logId
+      logId,
     });
   }
 
@@ -1009,12 +1046,15 @@ export class DyCast {
       this.pingTimer = void 0;
     }
     this.cursor = {
-      cursor: '',
-      firstCursor: '',
-      internalExt: ''
+      cursor: "",
+      firstCursor: "",
+      internalExt: "",
     };
     this.wsRoomStatus = WSRoomStatus.CLOSED;
-    this.closeEvent = { code: DyCastCloseCode.NO_STATUS, msg: 'CLOSE_NO_STATUS' };
+    this.closeEvent = {
+      code: DyCastCloseCode.NO_STATUS,
+      msg: "CLOSE_NO_STATUS",
+    };
     this.ws = void 0;
     this.isReconnecting = false;
   }
@@ -1046,8 +1086,8 @@ export class DyCast {
   private _mergeOptions(opts: any): string {
     return Object.keys(opts).reduce((t, n) => {
       let r;
-      return `${t}${t ? '&' : ''}${n}=${null != (r = opts[n]) ? r : ''}`;
-    }, '');
+      return `${t}${t ? "&" : ""}${n}=${null != (r = opts[n]) ? r : ""}`;
+    }, "");
   }
 
   /**
@@ -1077,9 +1117,9 @@ export class DyCast {
     return {
       room_id: roomId,
       user_unique_id: uniqueId,
-      cursor: this.imInfo.cursor || '',
-      internal_ext: this.imInfo.internalExt || '',
-      signature: sign
+      cursor: this.imInfo.cursor || "",
+      internal_ext: this.imInfo.internalExt || "",
+      signature: sign,
     };
   }
 
@@ -1092,35 +1132,35 @@ export class DyCast {
 
   /** 获取直播状态 */
   private getLiveStatus() {
-    let type = 'Unknown';
+    let type = "Unknown";
     let code = 0;
-    let msg = '未知状态';
+    let msg = "未知状态";
     switch (this.status) {
       case RoomStatus.PREPARE:
-        type = 'PREPARE';
+        type = "PREPARE";
         code = RoomStatus.PREPARE;
-        msg = '主播正在准备中';
+        msg = "主播正在准备中";
         break;
       case RoomStatus.LIVING:
-        type = 'LIVING';
+        type = "LIVING";
         code = RoomStatus.LIVING;
-        msg = '主播正在直播中';
+        msg = "主播正在直播中";
         break;
       case RoomStatus.PAUSE:
-        type = 'PAUSE';
+        type = "PAUSE";
         code = RoomStatus.PAUSE;
-        msg = '主播暂时离开了';
+        msg = "主播暂时离开了";
         break;
       case RoomStatus.END:
-        type = 'END';
+        type = "END";
         code = RoomStatus.END;
-        msg = '主播已下播';
+        msg = "主播已下播";
         break;
     }
     return {
       type,
       code,
-      msg
+      msg,
     };
   }
 
@@ -1130,7 +1170,7 @@ export class DyCast {
   public getLiveInfo(): DyLiveInfo {
     return {
       ...this.info,
-      roomNum: this.roomNum
+      roomNum: this.roomNum,
     };
   }
 }

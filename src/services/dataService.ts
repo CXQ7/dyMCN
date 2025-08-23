@@ -1,10 +1,10 @@
-import { supabase } from "./supabaseClient";
+import { supabase } from "@/config/supabase";
 import {
   PendingQuestion,
   AnsweredQuestion,
   Transaction,
   RoomMetrics,
-} from "../../types";
+} from "@/types";
 
 // 从数据库获取待应答问题
 export async function getPendingQuestions(): Promise<PendingQuestion[]> {

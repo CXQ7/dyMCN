@@ -5,7 +5,7 @@ export interface FileSaveOptions {
   mimeType?: string; // 指定 MIME 类型，优先使用
   description?: string; // 保存对话框中文件类型描述
   forceFallback?: boolean; // 是否强制使用传统下载方式
-  existStrategy?: 'prompt' | 'overwrite' | 'new'; // 文件存在时的处理方式
+  existStrategy?: "prompt" | "overwrite" | "new"; // 文件存在时的处理方式
 }
 
 export interface FileSaveResult {
@@ -17,26 +17,26 @@ export interface FileSaveResult {
 
 // 常见扩展名与 MIME 类型的映射表
 const mimeMap: Record<string, string> = {
-  '.txt': 'text/plain',
-  '.json': 'application/json',
-  '.html': 'text/html',
-  '.htm': 'text/html',
-  '.csv': 'text/csv',
-  '.xml': 'application/xml',
-  '.js': 'application/javascript',
-  '.ts': 'application/typescript',
-  '.css': 'text/css',
-  '.md': 'text/markdown',
-  '.pdf': 'application/pdf',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.gif': 'image/gif',
-  '.webp': 'image/webp',
-  '.svg': 'image/svg+xml',
-  '.zip': 'application/zip',
-  '.mp3': 'audio/mpeg',
-  '.mp4': 'video/mp4'
+  ".txt": "text/plain",
+  ".json": "application/json",
+  ".html": "text/html",
+  ".htm": "text/html",
+  ".csv": "text/csv",
+  ".xml": "application/xml",
+  ".js": "application/javascript",
+  ".ts": "application/typescript",
+  ".css": "text/css",
+  ".md": "text/markdown",
+  ".pdf": "application/pdf",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".webp": "image/webp",
+  ".svg": "image/svg+xml",
+  ".zip": "application/zip",
+  ".mp3": "audio/mpeg",
+  ".mp4": "video/mp4",
 };
 
 /**
@@ -46,24 +46,28 @@ const mimeMap: Record<string, string> = {
  *  - 支持自动根据扩展名识别 MIME 类型
  */
 class FileSaver {
-  static async save(content: string | Blob | ArrayBuffer, options: FileSaveOptions = {}): Promise<FileSaveResult> {
+  static async save(
+    content: string | Blob | ArrayBuffer,
+    options: FileSaveOptions = {}
+  ): Promise<FileSaveResult> {
     const {
       // 默认文件名为 'untitled'
-      name = 'untitled',
+      name = "untitled",
       // 默认扩展名为空
-      ext = '',
+      ext = "",
       // 如果用户传入了 mimeType 就使用它
       mimeType,
       // 文件类型描述默认是 'File'
-      description = 'File',
+      description = "File",
       // 是否强制使用 fallback (即原始的保存方式，创建标签)
       forceFallback = false,
       // 默认提示用户是否覆盖
-      existStrategy = 'prompt'
+      existStrategy = "prompt",
     } = options;
 
     // 自动根据扩展名推断 MIME 类型(如果未提供)
-    const inferredMime = mimeType || mimeMap[ext.toLowerCase()] || 'application/octet-stream';
+    const inferredMime =
+      mimeType || mimeMap[ext.toLowerCase()] || "application/octet-stream";
 
     try {
       // 如果支持 File System Access API 且不强制使用 fallback，则优先使用现代方式
@@ -73,20 +77,20 @@ class FileSaver {
           ext,
           mimeType: inferredMime,
           description,
-          existStrategy
+          existStrategy,
         });
       }
 
       // 否则使用传统下载方式(a 标签方式)
       return this.saveWithFallback(content, {
         name: this.ensureExtension(name, ext),
-        mimeType: inferredMime
+        mimeType: inferredMime,
       });
     } catch (error) {
       return {
         success: false,
         error: error as Error,
-        message: '文件保存失败'
+        message: "文件保存失败",
       };
     }
   }
@@ -104,7 +108,7 @@ class FileSaver {
       ext: string;
       mimeType: string;
       description: string;
-      existStrategy: 'prompt' | 'overwrite' | 'new';
+      existStrategy: "prompt" | "overwrite" | "new";
     }
   ): Promise<FileSaveResult> {
     try {
@@ -113,23 +117,29 @@ class FileSaver {
       let fileHandle: FileSystemFileHandle | null = null;
 
       // 如果不是强制创建新文件，可以选择已有文件
-      if (options.existStrategy !== 'new') {
+      if (options.existStrategy !== "new") {
         try {
-          [fileHandle] = await window.showOpenFilePicker({
+          // use any to access experimental API without TS DOM lib errors
+          [fileHandle] = await (window as any).showOpenFilePicker({
             types: [
               {
                 description: options.description,
-                accept: { [options.mimeType]: [options.ext] }
-              }
-            ]
+                accept: { [options.mimeType]: [options.ext] },
+              },
+            ],
           });
 
           // 如果策略为提示且用户拒绝覆盖，则取消操作
-          if (options.existStrategy === 'prompt' && !confirm(`文件 "${fileHandle.name}" 已存在，是否覆盖？`)) {
+          if (
+            options.existStrategy === "prompt" &&
+            // fileHandle may be undefined/null if user cancelled
+            fileHandle &&
+            !confirm(`文件 "${fileHandle.name}" 已存在，是否覆盖？`)
+          ) {
             return {
               success: false,
               fileHandle: null,
-              message: '用户取消覆盖'
+              message: "用户取消覆盖",
             };
           }
         } catch {
@@ -139,17 +149,18 @@ class FileSaver {
 
       // 没有文件句柄时，新建文件
       if (!fileHandle) {
-        fileHandle = await window.showSaveFilePicker({
+        fileHandle = await (window as any).showSaveFilePicker({
           suggestedName: fileName,
           types: [
             {
               description: options.description,
-              accept: { [options.mimeType]: [options.ext] }
-            }
-          ]
+              accept: { [options.mimeType]: [options.ext] },
+            },
+          ],
         });
       }
       // 获取可写流
+      if (!fileHandle) throw new Error("无法获取文件句柄");
       const writable = await fileHandle.createWritable();
       // 内容转换成 Blob
       const blob = this.normalizeContentToBlob(content, options.mimeType);
@@ -161,15 +172,15 @@ class FileSaver {
       return {
         success: true,
         fileHandle,
-        message: '文件保存成功'
+        message: "文件保存成功",
       };
     } catch (error) {
       // 用户取消操作的处理
-      if ((error as Error).name === 'AbortError') {
+      if ((error as Error).name === "AbortError") {
         return {
           success: false,
           fileHandle: null,
-          message: '用户取消操作'
+          message: "用户取消操作",
         };
       }
       throw error;
@@ -192,13 +203,13 @@ class FileSaver {
       // 创建临时 URL
       const url = URL.createObjectURL(blob);
       // 创建 <a> 标签
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       // 设置下载链接
       a.href = url;
       // 设置下载文件名
       a.download = options.name;
       // 隐藏标签
-      a.style.display = 'none';
+      a.style.display = "none";
       // 添加到页面中
       document.body.appendChild(a);
       // 触发下载
@@ -211,20 +222,24 @@ class FileSaver {
       return {
         success: true,
         fileHandle: null,
-        message: '文件下载开始'
+        message: "文件下载开始",
       };
     } catch (error) {
       return {
         success: false,
         error: error as Error,
-        message: '传统下载方式失败'
+        message: "传统下载方式失败",
       };
     }
   }
 
   // 判断当前浏览器是否支持 File System Access API
   private static isFSAvailable(): boolean {
-    return 'showSaveFilePicker' in window && 'showOpenFilePicker' in window && 'FileSystemFileHandle' in window;
+    return (
+      "showSaveFilePicker" in window &&
+      "showOpenFilePicker" in window &&
+      "FileSystemFileHandle" in window
+    );
   }
 
   // 确保文件名带有扩展名
@@ -233,8 +248,11 @@ class FileSaver {
   }
 
   // 将内容转换为标准 Blob 对象，便于写入或下载
-  private static normalizeContentToBlob(content: string | Blob | ArrayBuffer, mimeType: string): Blob {
-    if (typeof content === 'string') {
+  private static normalizeContentToBlob(
+    content: string | Blob | ArrayBuffer,
+    mimeType: string
+  ): Blob {
+    if (typeof content === "string") {
       return new Blob([content], { type: mimeType }); // 文本转 Blob
     }
     if (content instanceof Blob) {
@@ -243,7 +261,7 @@ class FileSaver {
     if (content instanceof ArrayBuffer) {
       return new Blob([new Uint8Array(content)], { type: mimeType }); // 二进制转 Blob
     }
-    throw new Error('Unsupported content type'); // 不支持的类型
+    throw new Error("Unsupported content type"); // 不支持的类型
   }
 }
 

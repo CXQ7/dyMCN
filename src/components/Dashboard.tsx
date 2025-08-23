@@ -28,7 +28,7 @@ import {
   UserCheck,
   Loader2,
 } from "lucide-react";
-import { RoomMetrics, TimeRange, LiveRoom } from "../types";
+import { RoomMetrics, TimeRange, LiveRoom } from "@/types";
 
 interface DashboardProps {
   metrics: RoomMetrics[];

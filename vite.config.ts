@@ -4,9 +4,11 @@ import { fileURLToPath, URL } from "node:url";
 
 export default defineConfig({
   plugins: [react()],
+  root: "src",
+  publicDir: "../public",
   resolve: {
     alias: {
-      "@": fileURLToPath(new URL("./", import.meta.url)),
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
   server: {
@@ -65,6 +67,7 @@ export default defineConfig({
     },
   },
   build: {
+    outDir: "../dist",
     rollupOptions: {
       output: {
         manualChunks: {

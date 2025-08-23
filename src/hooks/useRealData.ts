@@ -4,13 +4,13 @@ import {
   AnsweredQuestion,
   Transaction,
   RoomMetrics,
-} from "../../types";
+} from "@/types";
 import {
   getPendingQuestions,
   getAnsweredQuestions,
   getTransactions,
   getRoomMetrics,
-} from "../lib/dataService";
+} from "@/services/dataService";
 
 export function useRealData() {
   const [pendingQuestions, setPendingQuestions] = useState<PendingQuestion[]>(

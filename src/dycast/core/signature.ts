@@ -1,7 +1,8 @@
+// @ts-nocheck
 declare global {
   interface Window {
     byted_acrawler: {
-      frontierSign: (params: { 'X-MS-STUB': string }) => { 'X-Bogus'?: string };
+      frontierSign: (params: { "X-MS-STUB": string }) => { "X-Bogus"?: string };
     };
   }
 }
@@ -15,22 +16,25 @@ const stringToBytes = function (t) {
   bytesToString = function (t) {
     let n = [];
     for (let e = 0; e < t.length; e++) n.push(String.fromCharCode(t[e]));
-    return n.join('');
+    return n.join("");
   },
   bytesToWords = function (t) {
     let n = [];
-    for (let e = 0, p = 0; e < t.length; e++, p += 8) n[p >>> 5] |= t[e] << (24 - (p % 32));
+    for (let e = 0, p = 0; e < t.length; e++, p += 8)
+      n[p >>> 5] |= t[e] << (24 - (p % 32));
     return n;
   },
   wordsToBytes = function (t) {
     let n = [];
-    for (let e = 0; e < 32 * t.length; e += 8) n.push((t[e >>> 5] >>> (24 - (e % 32))) & 255);
+    for (let e = 0; e < 32 * t.length; e += 8)
+      n.push((t[e >>> 5] >>> (24 - (e % 32))) & 255);
     return n;
   },
   bytesToHex = function (t) {
     let n = [];
-    for (let e = 0; e < t.length; e++) n.push((t[e] >>> 4).toString(16)), n.push((15 & t[e]).toString(16));
-    return n.join('');
+    for (let e = 0; e < t.length; e++)
+      n.push((t[e] >>> 4).toString(16)), n.push((15 & t[e]).toString(16));
+    return n.join("");
   },
   _ff = function (t, n, e, p, r, o, i) {
     var u = t + ((n & e) | (~n & p)) + (r >>> 0) + i;
@@ -52,7 +56,8 @@ const stringToBytes = function (t) {
     return (t << n) | (t >>> (32 - n));
   },
   endian = function (t) {
-    if (t.constructor == Number) return (16711935 & rotl(t, 8)) | (4278255360 & rotl(t, 24));
+    if (t.constructor == Number)
+      return (16711935 & rotl(t, 8)) | (4278255360 & rotl(t, 24));
     for (let n = 0; n < t.length; n++) t[n] = endian(t[n]);
     return t;
   };
@@ -65,7 +70,9 @@ function un(t, n) {
     u = -1732584194,
     l = 271733878;
   for (let t = 0; t < e.length; t++)
-    e[t] = (16711935 & ((e[t] << 8) | (e[t] >>> 24))) | (4278255360 & ((e[t] << 24) | (e[t] >>> 8)));
+    e[t] =
+      (16711935 & ((e[t] << 8) | (e[t] >>> 24))) |
+      (4278255360 & ((e[t] << 24) | (e[t] >>> 8)));
   (e[r >>> 5] |= 128 << r % 32), (e[14 + (((r + 64) >>> 9) << 4)] = r);
   let f = _ff,
     s = _gg,
@@ -91,7 +98,15 @@ function un(t, n) {
                             (o = f(o, i, u, l, e[p + 0], 7, -680876936)),
                             (i = f(
                               i,
-                              (u = f(u, (l = f(l, o, i, u, e[p + 1], 12, -389564586)), o, i, e[p + 2], 17, 606105819)),
+                              (u = f(
+                                u,
+                                (l = f(l, o, i, u, e[p + 1], 12, -389564586)),
+                                o,
+                                i,
+                                e[p + 2],
+                                17,
+                                606105819
+                              )),
                               l,
                               o,
                               e[p + 3],
@@ -106,7 +121,15 @@ function un(t, n) {
                           )),
                           (i = f(
                             i,
-                            (u = f(u, (l = f(l, o, i, u, e[p + 5], 12, 1200080426)), o, i, e[p + 6], 17, -1473231341)),
+                            (u = f(
+                              u,
+                              (l = f(l, o, i, u, e[p + 5], 12, 1200080426)),
+                              o,
+                              i,
+                              e[p + 6],
+                              17,
+                              -1473231341
+                            )),
                             l,
                             o,
                             e[p + 7],
@@ -121,7 +144,15 @@ function un(t, n) {
                         )),
                         (i = f(
                           i,
-                          (u = f(u, (l = f(l, o, i, u, e[p + 9], 12, -1958414417)), o, i, e[p + 10], 17, -42063)),
+                          (u = f(
+                            u,
+                            (l = f(l, o, i, u, e[p + 9], 12, -1958414417)),
+                            o,
+                            i,
+                            e[p + 10],
+                            17,
+                            -42063
+                          )),
                           l,
                           o,
                           e[p + 11],
@@ -136,7 +167,15 @@ function un(t, n) {
                       )),
                       (i = f(
                         i,
-                        (u = f(u, (l = f(l, o, i, u, e[p + 13], 12, -40341101)), o, i, e[p + 14], 17, -1502002290)),
+                        (u = f(
+                          u,
+                          (l = f(l, o, i, u, e[p + 13], 12, -40341101)),
+                          o,
+                          i,
+                          e[p + 14],
+                          17,
+                          -1502002290
+                        )),
                         l,
                         o,
                         e[p + 15],
@@ -151,7 +190,15 @@ function un(t, n) {
                     )),
                     (i = s(
                       i,
-                      (u = s(u, (l = s(l, o, i, u, e[p + 6], 9, -1069501632)), o, i, e[p + 11], 14, 643717713)),
+                      (u = s(
+                        u,
+                        (l = s(l, o, i, u, e[p + 6], 9, -1069501632)),
+                        o,
+                        i,
+                        e[p + 11],
+                        14,
+                        643717713
+                      )),
                       l,
                       o,
                       e[p + 0],
@@ -166,7 +213,15 @@ function un(t, n) {
                   )),
                   (i = s(
                     i,
-                    (u = s(u, (l = s(l, o, i, u, e[p + 10], 9, 38016083)), o, i, e[p + 15], 14, -660478335)),
+                    (u = s(
+                      u,
+                      (l = s(l, o, i, u, e[p + 10], 9, 38016083)),
+                      o,
+                      i,
+                      e[p + 15],
+                      14,
+                      -660478335
+                    )),
                     l,
                     o,
                     e[p + 4],
@@ -181,7 +236,15 @@ function un(t, n) {
                 )),
                 (i = s(
                   i,
-                  (u = s(u, (l = s(l, o, i, u, e[p + 14], 9, -1019803690)), o, i, e[p + 3], 14, -187363961)),
+                  (u = s(
+                    u,
+                    (l = s(l, o, i, u, e[p + 14], 9, -1019803690)),
+                    o,
+                    i,
+                    e[p + 3],
+                    14,
+                    -187363961
+                  )),
                   l,
                   o,
                   e[p + 8],
@@ -196,7 +259,15 @@ function un(t, n) {
               )),
               (i = s(
                 i,
-                (u = s(u, (l = s(l, o, i, u, e[p + 2], 9, -51403784)), o, i, e[p + 7], 14, 1735328473)),
+                (u = s(
+                  u,
+                  (l = s(l, o, i, u, e[p + 2], 9, -51403784)),
+                  o,
+                  i,
+                  e[p + 7],
+                  14,
+                  1735328473
+                )),
                 l,
                 o,
                 e[p + 12],
@@ -211,7 +282,15 @@ function un(t, n) {
             )),
             (i = c(
               i,
-              (u = c(u, (l = c(l, o, i, u, e[p + 8], 11, -2022574463)), o, i, e[p + 11], 16, 1839030562)),
+              (u = c(
+                u,
+                (l = c(l, o, i, u, e[p + 8], 11, -2022574463)),
+                o,
+                i,
+                e[p + 11],
+                16,
+                1839030562
+              )),
               l,
               o,
               e[p + 14],
@@ -226,7 +305,15 @@ function un(t, n) {
           )),
           (i = c(
             i,
-            (u = c(u, (l = c(l, o, i, u, e[p + 4], 11, 1272893353)), o, i, e[p + 7], 16, -155497632)),
+            (u = c(
+              u,
+              (l = c(l, o, i, u, e[p + 4], 11, 1272893353)),
+              o,
+              i,
+              e[p + 7],
+              16,
+              -155497632
+            )),
             l,
             o,
             e[p + 10],
@@ -241,7 +328,15 @@ function un(t, n) {
         )),
         (i = c(
           i,
-          (u = c(u, (l = c(l, o, i, u, e[p + 0], 11, -358537222)), o, i, e[p + 3], 16, -722521979)),
+          (u = c(
+            u,
+            (l = c(l, o, i, u, e[p + 0], 11, -358537222)),
+            o,
+            i,
+            e[p + 3],
+            16,
+            -722521979
+          )),
           l,
           o,
           e[p + 6],
@@ -256,7 +351,15 @@ function un(t, n) {
       )),
       (i = c(
         i,
-        (u = c(u, (l = c(l, o, i, u, e[p + 12], 11, -421815835)), o, i, e[p + 15], 16, 530742520)),
+        (u = c(
+          u,
+          (l = c(l, o, i, u, e[p + 12], 11, -421815835)),
+          o,
+          i,
+          e[p + 15],
+          16,
+          530742520
+        )),
         l,
         o,
         e[p + 2],
@@ -274,7 +377,15 @@ function un(t, n) {
           (i = d(
             (i = d(
               i,
-              (u = d(u, (l = d(l, o, i, u, e[p + 7], 10, 1126891415)), o, i, e[p + 14], 15, -1416354905)),
+              (u = d(
+                u,
+                (l = d(l, o, i, u, e[p + 7], 10, 1126891415)),
+                o,
+                i,
+                e[p + 14],
+                15,
+                -1416354905
+              )),
               l,
               o,
               e[p + 5],
@@ -283,7 +394,15 @@ function un(t, n) {
             )),
             (u = d(
               u,
-              (l = d(l, (o = d(o, i, u, l, e[p + 12], 6, 1700485571)), i, u, e[p + 3], 10, -1894986606)),
+              (l = d(
+                l,
+                (o = d(o, i, u, l, e[p + 12], 6, 1700485571)),
+                i,
+                u,
+                e[p + 3],
+                10,
+                -1894986606
+              )),
               o,
               i,
               e[p + 10],
@@ -298,7 +417,15 @@ function un(t, n) {
           )),
           (u = d(
             u,
-            (l = d(l, (o = d(o, i, u, l, e[p + 8], 6, 1873313359)), i, u, e[p + 15], 10, -30611744)),
+            (l = d(
+              l,
+              (o = d(o, i, u, l, e[p + 8], 6, 1873313359)),
+              i,
+              u,
+              e[p + 15],
+              10,
+              -30611744
+            )),
             o,
             i,
             e[p + 6],
@@ -313,7 +440,15 @@ function un(t, n) {
         )),
         (u = d(
           u,
-          (l = d(l, (o = d(o, i, u, l, e[p + 4], 6, -145523070)), i, u, e[p + 11], 10, -1120210379)),
+          (l = d(
+            l,
+            (o = d(o, i, u, l, e[p + 4], 6, -145523070)),
+            i,
+            u,
+            e[p + 11],
+            10,
+            -1120210379
+          )),
           o,
           i,
           e[p + 2],
@@ -345,16 +480,16 @@ function getSTUB(t) {
  * @return {string} signature
  */
 export const getSignature = function (roomId, uniqueId) {
-  const sdkVersion = '1.0.14-beta.0';
+  const sdkVersion = "1.0.14-beta.0";
   const e = getSTUB(
     `live_id=1,aid=6383,version_code=180800,webcast_sdk_version=${sdkVersion},room_id=${roomId},sub_room_id=,sub_channel_id=,did_rule=3,user_unique_id=${uniqueId},device_platform=web,device_type=,ac=,identity=audience`
   );
   // 也可以自己去文件内把 frontierSign 代码提取出来
   // 之前提取过，但这里就不放出来了，感兴趣自己尝试
   const res = window.byted_acrawler.frontierSign({
-    'X-MS-STUB': e
+    "X-MS-STUB": e,
   });
-  return res['X-Bogus'] || '';
+  return res["X-Bogus"] || "";
 };
 
 /**
@@ -364,8 +499,9 @@ export const getSignature = function (roomId, uniqueId) {
  * @returns
  */
 export const getMsToken = function (length = 182) {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-  let result = '';
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  let result = "";
   for (let i = 0; i < length; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }

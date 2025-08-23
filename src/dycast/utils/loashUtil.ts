@@ -55,11 +55,11 @@ const hasOwnProperty = objectProto.hasOwnProperty;
 
 const nativeObjectToString = objectProto.toString;
 
-const undefinedTag = '[object Undefined]';
+const undefinedTag = "[object Undefined]";
 
-const nullTag = '[object Null]';
+const nullTag = "[object Null]";
 
-const symbolTag = '[object Symbol]';
+const symbolTag = "[object Symbol]";
 
 const symToStringTag = Symbol.toStringTag;
 
@@ -120,7 +120,9 @@ function baseGetTag(value: any) {
   if (value == null) {
     return value === undefined ? undefinedTag : nullTag;
   }
-  return symToStringTag && symToStringTag in Object(value) ? getRawTag(value) : objectToString(value);
+  return symToStringTag && symToStringTag in Object(value)
+    ? getRawTag(value)
+    : objectToString(value);
 }
 
 /**
@@ -129,7 +131,7 @@ function baseGetTag(value: any) {
  * @returns
  */
 function isObjectLike(value: any) {
-  return value != null && typeof value == 'object';
+  return value != null && typeof value == "object";
 }
 
 /**
@@ -139,7 +141,7 @@ function isObjectLike(value: any) {
  */
 function isObject(value?: any): value is Object {
   const type = typeof value;
-  return value != null && (type == 'object' || type == 'function');
+  return value != null && (type == "object" || type == "function");
 }
 
 /**
@@ -148,7 +150,10 @@ function isObject(value?: any): value is Object {
  * @returns
  */
 function isSymbol(value: any) {
-  return typeof value == 'symbol' || (isObjectLike(value) && baseGetTag(value) == symbolTag);
+  return (
+    typeof value == "symbol" ||
+    (isObjectLike(value) && baseGetTag(value) == symbolTag)
+  );
 }
 
 /**
@@ -169,7 +174,9 @@ function trimmedEndIndex(string: string) {
  * @returns
  */
 function baseTrim(string: string) {
-  return string ? string.slice(0, trimmedEndIndex(string) + 1).replace(reTrimStart, '') : string;
+  return string
+    ? string.slice(0, trimmedEndIndex(string) + 1).replace(reTrimStart, "")
+    : string;
 }
 
 /**
@@ -178,17 +185,17 @@ function baseTrim(string: string) {
  * @returns
  */
 export function toNumber(value: any): number {
-  if (typeof value == 'number') {
+  if (typeof value == "number") {
     return value;
   }
   if (isSymbol(value)) {
     return NAN;
   }
   if (isObject(value)) {
-    const other = typeof value.valueOf == 'function' ? value.valueOf() : value;
-    value = isObject(other) ? other + '' : other;
+    const other = typeof value.valueOf == "function" ? value.valueOf() : value;
+    value = isObject(other) ? other + "" : other;
   }
-  if (typeof value != 'string') {
+  if (typeof value != "string") {
     return value === 0 ? value : +value;
   }
   value = baseTrim(value);
@@ -229,22 +236,22 @@ export function debounce<T extends (...args: any) => any>(
     lastThis: any,
     maxWait: number = 0,
     result: DebouncedFunc<T>,
-    timerId: number | undefined,
+    timerId: ReturnType<typeof setTimeout> | undefined,
     lastCallTime: number | undefined,
     lastInvokeTime = 0,
     leading = false,
     maxing = false,
     trailing = true;
 
-  if (typeof func != 'function') {
-    throw new TypeError('Expected a function');
+  if (typeof func != "function") {
+    throw new TypeError("Expected a function");
   }
   wait = toNumber(wait) || 0;
   if (isObject(options)) {
     leading = !!options.leading;
-    maxing = 'maxWait' in options;
+    maxing = "maxWait" in options;
     maxWait = maxing ? Math.max(toNumber(options.maxWait) || 0, wait) : maxWait;
-    trailing = 'trailing' in options ? !!options.trailing : trailing;
+    trailing = "trailing" in options ? !!options.trailing : trailing;
   }
 
   /**
@@ -276,7 +283,9 @@ export function debounce<T extends (...args: any) => any>(
       timeSinceLastInvoke = time - lastInvokeTime,
       timeWaiting = (wait as number) - timeSinceLastCall;
 
-    return maxing ? Math.min(timeWaiting, maxWait - timeSinceLastInvoke) : timeWaiting;
+    return maxing
+      ? Math.min(timeWaiting, maxWait - timeSinceLastInvoke)
+      : timeWaiting;
   }
 
   function shouldInvoke(time: number) {
@@ -371,20 +380,24 @@ export function debounce<T extends (...args: any) => any>(
  * @example
  *  - 适用于如滚动(scroll)事件的回调
  */
-export function throttle<T extends (...args: any) => any>(func: T, wait?: number, options?: ThrottleOptions) {
+export function throttle<T extends (...args: any) => any>(
+  func: T,
+  wait?: number,
+  options?: ThrottleOptions
+) {
   let leading = true,
     trailing = true;
 
-  if (typeof func != 'function') {
-    throw new TypeError('Expected a function');
+  if (typeof func != "function") {
+    throw new TypeError("Expected a function");
   }
   if (isObject(options)) {
-    leading = 'leading' in options ? !!options.leading : leading;
-    trailing = 'trailing' in options ? !!options.trailing : trailing;
+    leading = "leading" in options ? !!options.leading : leading;
+    trailing = "trailing" in options ? !!options.trailing : trailing;
   }
   return debounce(func, wait, {
     leading: leading,
     maxWait: wait,
-    trailing: trailing
+    trailing: trailing,
   });
 }

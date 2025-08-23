@@ -1,5 +1,5 @@
 // @ts-ignore
-import { supabase } from "../../lib/supabaseClient";
+import { supabase } from "@/config/supabase";
 import { DyCast, CastMethod } from "../core/dycast";
 // @ts-ignore
 import wsConfig from "../configs/wsconfig";

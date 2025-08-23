@@ -57,14 +57,14 @@ import {
   Archive,
   ArchiveRestore,
 } from "lucide-react";
-import { Document, KnowledgeItem, LiveRoom } from "../types";
-import { generateDocuments, generateKnowledgeItems } from "../utils/mockData";
-import { useLiveRooms } from "../src/hooks/useLiveRooms";
+import { Document, KnowledgeItem, LiveRoom } from "@/types";
+import { generateDocuments, generateKnowledgeItems } from "@/utils/mockData";
+import { useLiveRooms } from "@/hooks/useLiveRooms";
 import {
   createLiveRoom,
   updateLiveRoomStatus,
   deleteLiveRoom,
-} from "../src/lib/liveRoomService";
+} from "@/services/liveRoomService";
 import { toast } from "sonner";
 
 export function KnowledgeBasePage() {

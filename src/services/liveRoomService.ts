@@ -1,5 +1,5 @@
-import { supabase } from "./supabaseClient";
-import { LiveRoom } from "../../types";
+import { supabase } from "@/config/supabase";
+import { LiveRoom } from "@/types";
 
 export interface LiveRoomData {
   id: number;

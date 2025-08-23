@@ -7,7 +7,7 @@ import {
 } from "./ui/select";
 import { Badge } from "./ui/badge";
 import { Loader2 } from "lucide-react";
-import { LiveRoom } from "../types";
+import { LiveRoom } from "@/types";
 
 interface RoomFilterProps {
   liveRooms: LiveRoom[];

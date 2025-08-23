@@ -11,7 +11,7 @@ import { Label } from "../components/ui/label";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { LogIn, Shield, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { authenticateUser, getUserRoleLabel } from "../utils/mockData";
-import { User as UserType } from "../types";
+import { User as UserType } from "@/types";
 
 interface LoginPageProps {
   onLogin: (user: UserType) => Promise<void>;
