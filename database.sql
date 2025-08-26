@@ -112,3 +112,16 @@ CREATE INDEX IF NOT EXISTS idx_conversations_responder ON conversations(responde
 CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);
 CREATE INDEX IF NOT EXISTS idx_orders_live_room ON orders(live_room_id);
 CREATE INDEX IF NOT EXISTS idx_orders_response_related ON orders(is_response_related);
+
+-- 创建RPC函数来增加客户互动次数
+CREATE OR REPLACE FUNCTION increment_interaction_count(customer_id INTEGER)
+RETURNS VOID
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE customers 
+    SET interaction_count = interaction_count + 1,
+        updated_at = NOW()
+    WHERE id = customer_id;
+END;
+$$;

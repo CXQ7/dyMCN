@@ -1,3 +1,6 @@
+/**
+ * Supabase 客户端配置
+ */
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = "https://ojoxyalztyzcxlspwijw.supabase.co";

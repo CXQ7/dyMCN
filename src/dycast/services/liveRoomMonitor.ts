@@ -1,8 +1,9 @@
 // @ts-ignore
-import { supabase } from "@/config/supabase";
+import { supabase } from "@/configs/supabase";
 import { DyCast, CastMethod } from "../core/dycast";
 // @ts-ignore
 import wsConfig from "../configs/wsconfig";
+import { danmuAnalysisService } from "@/services/danmuAnalysisService";
 
 // 定义弹幕转发数据结构
 interface ForwardMessage {
@@ -239,6 +240,11 @@ class LiveRoomMonitor {
         }
 
         this.wsConnection?.send(JSON.stringify(forwardMsg));
+
+        // 处理弹幕分析 - 只对聊天消息进行分析
+        if (msg.method === CastMethod.CHAT) {
+          this.processDanmuAnalysis(forwardMsg);
+        }
       });
     });
 
@@ -257,6 +263,22 @@ class LiveRoomMonitor {
         console.error("在线人数回调执行失败:", error);
       }
     });
+  }
+
+  // 处理弹幕分析
+  private processDanmuAnalysis(forwardMsg: ForwardMessage): void {
+    // 异步处理弹幕分析，不阻塞主流程
+    danmuAnalysisService
+      .processDanmu({
+        room_id: forwardMsg.room_id,
+        method: forwardMsg.method,
+        content: forwardMsg.content,
+        timestamp: forwardMsg.timestamp,
+        user_info: forwardMsg.user_info,
+      })
+      .catch((error) => {
+        console.error(`[LiveRoomMonitor] 弹幕分析处理失败:`, error);
+      });
   }
 
   // 订阅在线人数更新

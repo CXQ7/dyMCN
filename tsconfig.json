@@ -23,6 +23,15 @@
     "styles",
     "types",
     "src/utils",
-    "src"
-  ]
+    "src",
+    "test_*.ts"
+  ],
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node",
+    "compilerOptions": {
+      "module": "ESNext",
+      "moduleResolution": "node"
+    }
+  }
 }

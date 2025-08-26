@@ -1,40 +1,17 @@
-import { supabase } from "@/config/supabase";
+import { supabase } from "@/configs/supabase";
 import {
   PendingQuestion,
   AnsweredQuestion,
   Transaction,
   RoomMetrics,
 } from "@/types";
+import { pendingQuestionsService } from "./pendingQuestionsService";
 
 // 从数据库获取待应答问题
 export async function getPendingQuestions(): Promise<PendingQuestion[]> {
   try {
-    const { data: questions, error } = await supabase
-      .from("qa_pairs")
-      .select(
-        `
-        id,
-        question,
-        created_at,
-        live_rooms!inner(platform_id, name)
-      `
-      )
-      .eq("source", null) // 假设待应答的问题source为null
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("获取待应答问题失败:", error);
-      return [];
-    }
-
-    return (questions || []).map((q: any) => ({
-      id: q.id.toString(),
-      roomId: q.live_rooms.platform_id,
-      roomName: q.live_rooms.name,
-      userName: "用户" + Math.floor(Math.random() * 1000), // 临时用户名
-      question: q.question,
-      timestamp: new Date(q.created_at),
-    }));
+    // 使用我们的pendingQuestionsService来获取真实的待应答问题
+    return await pendingQuestionsService.getAllPendingQuestions();
   } catch (error) {
     console.error("获取待应答问题异常:", error);
     return [];

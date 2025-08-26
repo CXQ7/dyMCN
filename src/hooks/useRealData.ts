@@ -50,6 +50,13 @@ export function useRealData() {
 
   useEffect(() => {
     loadData();
+
+    // 设置定期刷新，每30秒刷新一次待应答问题
+    const interval = setInterval(() => {
+      loadData();
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const refreshData = () => {

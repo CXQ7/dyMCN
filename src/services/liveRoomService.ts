@@ -1,4 +1,4 @@
-import { supabase } from "@/config/supabase";
+import { supabase } from "@/configs/supabase";
 import { LiveRoom } from "@/types";
 
 export interface LiveRoomData {
