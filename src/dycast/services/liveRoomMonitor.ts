@@ -37,9 +37,6 @@ class LiveRoomMonitor {
   private onlineCountCallbacks: Set<OnlineCountCallback> = new Set();
   private roomOnlineCounts: Map<string, number> = new Map();
 
-  constructor() {
-    // 移除自动初始化
-  }
 
   // 初始化WebSocket连接
   private async initWebSocket() {
@@ -75,6 +72,7 @@ class LiveRoomMonitor {
   public async startMonitoring(): Promise<void> {
     this.shouldReconnect = true;
     this.isMonitoringActive = true;
+    await this.startRoomConnections();
 
     // 如果WebSocket未连接，先初始化
     if (!this.wsConnection || this.wsConnection.readyState !== WebSocket.OPEN) {
@@ -91,9 +89,6 @@ class LiveRoomMonitor {
         };
         checkConnection();
       });
-    } else {
-      // 如果已连接，直接开始房间连接
-      await this.startRoomConnections();
     }
   }
 
@@ -182,10 +177,6 @@ class LiveRoomMonitor {
     });
 
     cast.on("message", (messages) => {
-      if (this.wsConnection?.readyState !== WebSocket.OPEN) {
-        return;
-      }
-
       // 转发弹幕消息
       messages.forEach((msg) => {
         // 检查是否是在线人数更新消息
@@ -239,9 +230,12 @@ class LiveRoomMonitor {
           };
         }
 
-        this.wsConnection?.send(JSON.stringify(forwardMsg));
+        // 如果WebSocket连接已打开，则发送消息
+        if (this.wsConnection?.readyState === WebSocket.OPEN) {
+          this.wsConnection.send(JSON.stringify(forwardMsg));
+        }
 
-        // 处理弹幕分析 - 只对聊天消息进行分析
+        // 只对聊天消息进行分析
         if (msg.method === CastMethod.CHAT) {
           this.processDanmuAnalysis(forwardMsg);
         }

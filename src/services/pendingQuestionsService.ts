@@ -2,7 +2,7 @@ import { supabase } from "@/configs/supabase";
 import { PendingQuestion } from "@/types";
 
 /**
- * 待应答问题数据库字段接口 (基于questions表)
+ * 待应答问题数据库字段接口
  */
 export interface QuestionData {
   id: number;
@@ -25,7 +25,7 @@ export interface QuestionData {
 
 /**
  * 待应答问题服务
- * 负责管理待应答问题的CRUD操作 (使用questions表)
+ * 负责管理待应答问题的CRUD操作 
  */
 class PendingQuestionsService {
   /**
